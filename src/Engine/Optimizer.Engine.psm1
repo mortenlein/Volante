@@ -1,5 +1,5 @@
-﻿<#
-    GameTune engine - pure logic, no UI.
+<#
+    Volante engine - pure logic, no UI.
     Provides: logging, admin check, restore point, a tracked backup store
     (for TRUE revert), and apply/revert/test wrappers over the tweak catalog.
     Target: Windows PowerShell 5.1 (STA), Windows 10/11.
@@ -8,10 +8,10 @@
 $ErrorActionPreference = 'Stop'
 
 # --- Paths -------------------------------------------------------------------
-$script:DataRoot   = Join-Path $env:ProgramData 'GameTune'
+$script:DataRoot   = Join-Path $env:ProgramData 'Volante'
 $script:LogDir     = Join-Path $script:DataRoot  'logs'
 $script:BackupFile = Join-Path $script:DataRoot  'backup.json'
-$script:LogFile    = Join-Path $script:LogDir    ('gametune_{0:yyyyMMdd}.log' -f (Get-Date))
+$script:LogFile    = Join-Path $script:LogDir    ('volante_{0:yyyyMMdd}.log' -f (Get-Date))
 $script:LogSink    = $null   # optional callback (GUI) -> & $sink $line $level
 
 function Initialize-Store {
@@ -48,7 +48,7 @@ function Test-IsAdmin {
 }
 
 function New-OptimizerRestorePoint {
-    param([string]$Description = 'GameTune - before tweaks')
+    param([string]$Description = 'Volante - before tweaks')
     if (-not (Test-IsAdmin)) { Write-Log 'Restore point skipped (needs admin).' 'WARN'; return $false }
     try {
         Enable-ComputerRestore -Drive "$env:SystemDrive\" -ErrorAction SilentlyContinue

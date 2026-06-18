@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <assembly manifestVersion="1.0" xmlns="urn:schemas-microsoft-com:asm.v1">
-  <!-- Request elevation so GameTune can apply machine-level tweaks (auto-UAC). -->
+  <!-- Request elevation so Volante can apply machine-level tweaks (auto-UAC). -->
   <trustInfo xmlns="urn:schemas-microsoft-com:asm.v3">
     <security>
       <requestedPrivileges>

@@ -1,5 +1,5 @@
-﻿<#
-    GameTune tweak catalog.
+<#
+    Volante tweak catalog.
     Each tweak is a self-describing object with Test / Apply / Revert script blocks.
     Conventions:
       Scope        = 'User' (HKCU only, no admin) | 'Machine' (HKLM/services/powercfg, needs admin)

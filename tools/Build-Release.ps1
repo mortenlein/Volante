@@ -24,11 +24,11 @@ function Invoke-Sign($files) {
     & (Join-Path $PSScriptRoot 'Sign.ps1') @p
 }
 
-Write-Host '== 1/4  Build GameTune.exe =='
+Write-Host '== 1/4  Build Volante.exe =='
 & (Join-Path $PSScriptRoot 'Build-Exe.ps1')
 
-Write-Host '== 2/4  Sign GameTune.exe =='
-Invoke-Sign @("$root\GameTune.exe")
+Write-Host '== 2/4  Sign Volante.exe =='
+Invoke-Sign @("$root\Volante.exe")
 
 Write-Host '== 3/4  Build installer =='
 & (Join-Path $PSScriptRoot 'Build-Installer.ps1')

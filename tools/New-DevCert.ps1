@@ -11,7 +11,7 @@
       tools\New-DevCert.ps1 -ExportPfx dev.pfx
 #>
 param(
-    [string]       $Subject = 'CN=GameTune Dev',
+    [string]       $Subject = 'CN=Volante Dev',
     [string]       $ExportPfx,
     [securestring] $PfxPassword
 )

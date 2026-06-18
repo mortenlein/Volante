@@ -1,5 +1,5 @@
-// GameTune launcher - compiled into GameTune.exe by tools\Build-Exe.ps1 (csc.exe).
-// A thin native front door: it finds the GameTune folder next to the exe and opens
+// Volante launcher - compiled into Volante.exe by tools\Build-Exe.ps1 (csc.exe).
+// A thin native front door: it finds the Volante folder next to the exe and opens
 // the WPF GUI by running the plain-text .ps1 on disk with a hidden console.
 // The exe carries an admin manifest (auto-UAC) and is a Windows (no-console) app.
 using System;
@@ -7,7 +7,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows.Forms;
 
-static class GameTuneLauncher
+static class VolanteLauncher
 {
     [STAThread]
     static void Main()
@@ -21,10 +21,10 @@ static class GameTuneLauncher
             if (!File.Exists(gui) || !File.Exists(engine))
             {
                 MessageBox.Show(
-                    "GameTune's program files weren't found next to the app.\n" +
-                    "Keep GameTune.exe in the GameTune folder (with the 'src' folder).\n\n" +
+                    "Volante's program files weren't found next to the app.\n" +
+                    "Keep Volante.exe in the Volante folder (with the 'src' folder).\n\n" +
                     "Looked in: " + exeDir,
-                    "GameTune", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    "Volante", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
@@ -42,8 +42,9 @@ static class GameTuneLauncher
         }
         catch (Exception ex)
         {
-            MessageBox.Show("GameTune failed to start:\n" + ex.Message,
-                "GameTune", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            MessageBox.Show("Volante failed to start:\n" + ex.Message,
+                "Volante", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
 }
+

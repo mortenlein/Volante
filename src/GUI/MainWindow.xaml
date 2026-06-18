@@ -1,7 +1,7 @@
 <Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
-        Title="GameTune" Height="740" Width="920"
+        Title="Volante" Height="740" Width="920"
         WindowStartupLocation="CenterScreen" Background="#0F1117" FontFamily="Segoe UI">
 
   <Window.Resources>
@@ -102,7 +102,7 @@
     <Border Grid.Row="0" Background="#161A24" Padding="24,16">
       <Grid>
         <StackPanel>
-          <TextBlock Text="GameTune" Foreground="#FFFFFF" FontSize="22" FontWeight="SemiBold"/>
+          <TextBlock Text="Volante" Foreground="#FFFFFF" FontSize="22" FontWeight="SemiBold"/>
           <TextBlock x:Name="HeaderSubtitle" Text="Let's tune your PC for gaming"
                      Foreground="#8A90A2" FontSize="13"/>
         </StackPanel>

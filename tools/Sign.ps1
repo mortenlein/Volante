@@ -1,12 +1,12 @@
 <#
-    Authenticode code-signing for GameTune.exe and the installer.
+    Authenticode code-signing for Volante.exe and the installer.
     Use a .pfx file OR an installed certificate (by thumbprint). An RFC3161
     timestamp is added by default so signatures stay valid after the cert expires.
 
     Examples:
       tools\Sign.ps1 -PfxPath cert.pfx
       tools\Sign.ps1 -Thumbprint ABC123...                       # cert already in your store
-      tools\Sign.ps1 -PfxPath cert.pfx -Path GameTune.exe,dist\GameTune-Setup-1.0.0.exe
+      tools\Sign.ps1 -PfxPath cert.pfx -Path Volante.exe,dist\Volante-Setup-1.0.0.exe
 #>
 [CmdletBinding(DefaultParameterSetName = 'Pfx')]
 param(
@@ -22,7 +22,7 @@ $root = Split-Path $PSScriptRoot -Parent
 
 # Default targets: the exe plus any built installer.
 if (-not $Path) {
-    $Path = @("$root\GameTune.exe")
+    $Path = @("$root\Volante.exe")
     Get-ChildItem "$root\dist\*.exe" -ErrorAction SilentlyContinue | ForEach-Object { $Path += $_.FullName }
 }
 

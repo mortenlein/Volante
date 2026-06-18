@@ -1,4 +1,4 @@
-﻿# GameTune
+# Volante
 
 A transparent, **reversible** Windows 10/11 game-tweaking tool - rebuilt from a
 typical "game optimizer" pack with the dangerous/placebo parts removed and a
@@ -21,8 +21,8 @@ Both call the *same* engine, so results are identical. Every change records its
 **original value** to a backup store before writing, so revert restores reality -
 not a guessed default.
 
-- Backup store: `%ProgramData%\GameTune\backup.json`
-- Logs: `%ProgramData%\GameTune\logs\gametune_YYYYMMDD.log`
+- Backup store: `%ProgramData%\Volante\backup.json`
+- Logs: `%ProgramData%\Volante\logs\gametune_YYYYMMDD.log`
 
 ## Requirements
 
@@ -31,9 +31,9 @@ not a guessed default.
 
 ## GUI
 
-Double-click **`GameTune.exe`** - a tiny native launcher with an icon that prompts
+Double-click **`Volante.exe`** - a tiny native launcher with an icon that prompts
 for admin automatically (UAC) and opens with no console window. (No exe yet? See
-**Building the launcher** below, or use `GameTune.cmd` which does the same thing
+**Building the launcher** below, or use `Volante.cmd` which does the same thing
 from PowerShell.) It opens in two modes:
 
 **Wizard (default - for everyone):** a guided flow.
@@ -106,7 +106,7 @@ the wizard and `-Recommended`) is the ~19 lower-risk ones; Advanced/contested tw
 (`hags-on`, `diagtrack-off`, `win32-priority-separation`, `fast-startup-off`,
 `reduce-animations`, `transparency-off`, `gpu-msi-mode`, `nagle-off`) are opt-in.
 
-## Building the launcher (GameTune.exe)
+## Building the launcher (Volante.exe)
 
 The exe is a ~13 KB native launcher compiled from `src\Launcher.cs` with an embedded
 icon and admin manifest. It just runs the plain-text `.ps1` engine on disk, so the
@@ -117,10 +117,10 @@ compiler - no install, no internet:
 powershell -NoProfile -ExecutionPolicy Bypass -File tools\Build-Exe.ps1
 ```
 
-This (re)generates `assets\gametune.ico` if missing and produces `GameTune.exe`.
+This (re)generates `assets\gametune.ico` if missing and produces `Volante.exe`.
 The exe is **unsigned**, so first run may show a SmartScreen prompt
 ("More info" > "Run anyway"); code-signing is the only thing that removes that.
-For headless/deployment, keep using `Optimize.ps1` / `GameTune.cmd` (the exe is
+For headless/deployment, keep using `Optimize.ps1` / `Volante.cmd` (the exe is
 GUI-only and has no console output).
 
 ## Code-signing (removes SmartScreen warnings)
@@ -136,7 +136,7 @@ tools\Sign.ps1 -Thumbprint <thumbprint>          # cert already in your store
 tools\New-DevCert.ps1
 ```
 
-`Sign.ps1` signs `GameTune.exe` (and any `dist\*.exe` installer) with SHA-256 and an
+`Sign.ps1` signs `Volante.exe` (and any `dist\*.exe` installer) with SHA-256 and an
 RFC3161 timestamp, so signatures stay valid after the cert expires.
 
 - **Self-signed** cert: trusted only where you deploy it (your PCs / a managed fleet
@@ -146,8 +146,8 @@ RFC3161 timestamp, so signatures stay valid after the cert expires.
 
 ## Installer (Inno Setup)
 
-Builds `dist\GameTune-Setup-<ver>.exe` with Start-menu + optional desktop shortcuts
-and an uninstaller, installing to `Program Files\GameTune`.
+Builds `dist\Volante-Setup-<ver>.exe` with Start-menu + optional desktop shortcuts
+and an uninstaller, installing to `Program Files\Volante`.
 
 ```powershell
 tools\Build-Installer.ps1     # requires Inno Setup 6 (free): https://jrsoftware.org/isdl.php
@@ -177,3 +177,4 @@ both the GUI and headless modes.
 CCleaner / registry cleaning, blanket service-disabling (BITS, Spooler, Bluetooth,
 Hyper-V), `SysMain`/Prefetch disabling on SSDs, blocking driver auto-download, and
 the broken hibernate `.reg`. See the project notes for the rationale.
+

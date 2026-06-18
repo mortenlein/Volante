@@ -1,11 +1,11 @@
-; GameTune installer script (Inno Setup 6).
+; Volante installer script (Inno Setup 6).
 ; Build with:  powershell -File tools\Build-Installer.ps1
-; or directly: "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer\GameTune.iss
+; or directly: "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer\Volante.iss
 
-#define AppName "GameTune"
+#define AppName "Volante"
 #define AppVersion "1.0.0"
-#define AppPublisher "GameTune"
-#define AppExe "GameTune.exe"
+#define AppPublisher "Volante"
+#define AppExe "Volante.exe"
 
 [Setup]
 ; A stable, unique AppId so upgrades/uninstall work across versions.
@@ -18,7 +18,7 @@ DefaultGroupName={#AppName}
 DisableProgramGroupPage=yes
 UninstallDisplayIcon={app}\{#AppExe}
 OutputDir=..\dist
-OutputBaseFilename=GameTune-Setup-{#AppVersion}
+OutputBaseFilename=Volante-Setup-{#AppVersion}
 SetupIconFile=..\assets\gametune.ico
 Compression=lzma2
 SolidCompression=yes
@@ -27,8 +27,8 @@ WizardStyle=modern
 PrivilegesRequired=admin
 
 [Files]
-Source: "..\GameTune.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "..\GameTune.cmd"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\Volante.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\Volante.cmd"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\Optimize.ps1"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\README.md";    DestDir: "{app}"; Flags: ignoreversion
 Source: "..\src\*";    DestDir: "{app}\src";    Flags: ignoreversion recursesubdirs createallsubdirs
@@ -45,3 +45,4 @@ Name: "desktopicon"; Description: "Create a desktop shortcut"; GroupDescription:
 
 [Run]
 Filename: "{app}\{#AppExe}"; Description: "Launch {#AppName} now"; Flags: nowait postinstall skipifsilent
+

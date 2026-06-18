@@ -1,5 +1,5 @@
 <#
-    Compiles installer\GameTune.iss into dist\GameTune-Setup-<ver>.exe using Inno
+    Compiles installer\Volante.iss into dist\Volante-Setup-<ver>.exe using Inno
     Setup's command-line compiler (ISCC.exe).
 
     Inno Setup 6 must be installed (free): https://jrsoftware.org/isdl.php
@@ -7,10 +7,11 @@
 #>
 $ErrorActionPreference = 'Stop'
 $root = Split-Path $PSScriptRoot -Parent
-$iss  = Join-Path $root 'installer\GameTune.iss'
-$exe  = Join-Path $root 'GameTune.exe'
+$iss  = Join-Path $root 'installer\Volante.iss'
+$exe  = Join-Path $root 'Volante.exe'
 
-if (-not (Test-Path $exe)) { throw 'GameTune.exe not found - run tools\Build-Exe.ps1 first.' }
+if (-not (Test-Path $exe)) { throw 'Volante.exe not found - run tools\Build-Exe.ps1 first.' }
+
 
 # Known install locations (machine-wide and per-user), v6 and v5.
 $candidates = @(

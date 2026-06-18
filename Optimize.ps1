@@ -1,5 +1,5 @@
-﻿<#
-    GameTune - entry point.
+<#
+    Volante - entry point.
     No arguments  -> launches the GUI (elevating if needed).
     Any action arg-> headless mode (no prompts), for deployed PCs.
 
@@ -58,7 +58,7 @@ if ($noAction) {
 
 # --- Headless / CLI ----------------------------------------------------------
 $catalog = Get-TweakCatalog
-Write-Log "GameTune (headless) - admin=$([bool](Test-IsAdmin)) dryrun=$([bool]$DryRun)" 'INFO'
+Write-Log "Volante (headless) - admin=$([bool](Test-IsAdmin)) dryrun=$([bool]$DryRun)" 'INFO'
 
 if ($Report) {
     Write-Host ''
@@ -100,5 +100,5 @@ foreach ($id in $revIds) {
 }
 
 $doneLevel = 'OK'; if ($fail) { $doneLevel = 'WARN' }
-Write-Log "GameTune done. Failures=$fail" $doneLevel
+Write-Log "Volante done. Failures=$fail" $doneLevel
 exit $fail

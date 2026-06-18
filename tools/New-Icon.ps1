@@ -1,7 +1,7 @@
 <#
-    Generates assets\gametune.ico - a simple, clean app icon (gradient rounded
-    square with a bold "G"). Produces a 256x256 PNG-backed .ico (crisp on Vista+).
-    Replace assets\gametune.ico with a designed icon any time; the build picks up
+    Generates assets\volante.ico - a simple, clean app icon (gradient rounded
+    square with a bold "V"). Produces a 256x256 PNG-backed .ico (crisp on Vista+).
+    Replace assets\volante.ico with a designed icon any time; the build picks up
     whatever is there.
 #>
 $ErrorActionPreference = 'Stop'
@@ -10,7 +10,7 @@ Add-Type -AssemblyName System.Drawing
 $root   = Split-Path $PSScriptRoot -Parent
 $assets = Join-Path $root 'assets'
 if (-not (Test-Path $assets)) { New-Item -ItemType Directory -Path $assets -Force | Out-Null }
-$icoPath = Join-Path $assets 'gametune.ico'
+$icoPath = Join-Path $assets 'volante.ico'
 
 $size = 256
 $bmp  = New-Object System.Drawing.Bitmap $size, $size
@@ -34,12 +34,12 @@ $c2    = [System.Drawing.Color]::FromArgb(26, 30, 41)     # #1A1E29
 $brush = New-Object System.Drawing.Drawing2D.LinearGradientBrush $rect, $c1, $c2, ([System.Drawing.Drawing2D.LinearGradientMode]::ForwardDiagonal)
 $g.FillPath($brush, $path)
 
-# Bold "G".
+# Bold "V".
 $font = New-Object System.Drawing.Font 'Segoe UI', 150, ([System.Drawing.FontStyle]::Bold), ([System.Drawing.GraphicsUnit]::Pixel)
 $sf   = New-Object System.Drawing.StringFormat
 $sf.Alignment     = [System.Drawing.StringAlignment]::Center
 $sf.LineAlignment = [System.Drawing.StringAlignment]::Center
-$g.DrawString('G', $font, [System.Drawing.Brushes]::White, (New-Object System.Drawing.RectangleF 0, 4, $size, $size), $sf)
+$g.DrawString('V', $font, [System.Drawing.Brushes]::White, (New-Object System.Drawing.RectangleF 0, 4, $size, $size), $sf)
 $g.Dispose()
 
 # Encode the bitmap as PNG and wrap it in a single-entry ICO (PNG-in-ICO).

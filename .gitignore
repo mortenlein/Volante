@@ -1,5 +1,5 @@
 # Build output (rebuild with tools\Build-Exe.ps1 / Build-Release.ps1)
-GameTune.exe
+Volante.exe
 dist/
 
 # Signing material - never commit private keys

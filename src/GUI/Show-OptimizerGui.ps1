@@ -1,19 +1,16 @@
-<#
-    GameTune GUI (WPF). Two modes in one window:
-      - Wizard  (default): Goals -> Review -> Done. Friendly for normal users.
-      - Advanced: the full per-tweak list. Same engine underneath.
-    Must run STA (GameTune.cmd and the elevation relaunch both pass -STA).
-#>
+#     Volante GUI (WPF). Two modes in one window:
+#       - Wizard  (default): Goals -> Review -> Done. Friendly for normal users.
+#       - Advanced: the full per-tweak list. Same engine underneath.
+#     Must run STA (Volante.cmd and the elevation relaunch both pass -STA).
 param([string]$EnginePath)
 
 Add-Type -AssemblyName PresentationFramework, PresentationCore, WindowsBase
 Import-Module $EnginePath -Force
 
-# View-model with INotifyPropertyChanged so Select-All / Clear update the checkboxes.
-if (-not ('GameTune.TweakVm' -as [type])) {
+if (-not ('Volante.TweakVm' -as [type])) {
     Add-Type -Language CSharp @'
 using System.ComponentModel;
-namespace GameTune {
+namespace Volante {
   public class TweakVm : INotifyPropertyChanged {
     public string Id {get;set;}
     public string Name {get;set;}
@@ -192,7 +189,7 @@ function Update-List {
     $vms.Clear()
     foreach ($t in (Get-TweakCatalog)) {
         $s = Invoke-TweakTest $t
-        $vm = New-Object GameTune.TweakVm
+        $vm = New-Object Volante.TweakVm
         $vm.Id = $t.Id; $vm.Name = $t.Name; $vm.Category = $t.Category
         $vm.Description = $t.Description; $vm.Risk = $t.Risk; $vm.RiskColor = $riskColor[$t.Risk]
         if ($s.Applied) { $vm.StateText = "Already applied - $($s.Current)"; $vm.StateColor = '#2E9E5B' }

@@ -1,5 +1,5 @@
 {
-  "name": "GameTune recommended",
+  "name": "Volante recommended",
   "description": "Safe, high-value defaults. Edit the list to build your own deployment profile; run with: Optimize.ps1 -Headless -ProfilePath <thisfile>",
   "tweaks": [
     "mouse-accel-off",
