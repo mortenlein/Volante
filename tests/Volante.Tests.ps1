@@ -79,6 +79,13 @@ Describe 'Command dispatcher (JSON contract)' {
         ($d.data.cpu -ge 0) | Should Be $true
         ($d.data.cores).Count | Should BeGreaterThan 0
     }
+    It 'revertTweaks + getRestorePoints respond ok' {
+        $a = Invoke-VolanteCommand -Message '{"id":"t5","command":"revertTweaks","args":{"ids":[]}}' | ConvertFrom-Json
+        $a.ok | Should Be $true
+        $a.data.reverted | Should Be 0
+        $b = Invoke-VolanteCommand -Message '{"id":"t6","command":"getRestorePoints","args":{}}' | ConvertFrom-Json
+        $b.ok | Should Be $true
+    }
     It 'unknown command returns ok:false' {
         $d = Invoke-VolanteCommand -Message '{"id":"t4","command":"nope","args":{}}' | ConvertFrom-Json
         $d.ok | Should Be $false

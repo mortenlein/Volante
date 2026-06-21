@@ -373,6 +373,7 @@
                   <div style="font-size:11.5px; color:#6d6a66; margin-top:3px;">{{t.desc}}</div>
                 </div>
                 <span style="font-size:12px; font-weight:600; color:{{t.valColor}}; flex:none;">{{t.value}}</span>
+                <sc-if value="{{t.applied}}" hint-placeholder-val="{{false}}"><button onClick="{{t.onRevert}}" style="font-size:10.5px; color:#928f8b; background:none; border:1px solid #3f3f46; border-radius:5px; padding:3px 8px; cursor:pointer; font-family:inherit; flex:none;" style-hover="color:#c4c2bf;border-color:#54545c">Revert</button></sc-if>
               </div>
             </sc-for>
           </div>
@@ -588,9 +589,12 @@
 
       <sc-if value="{{screenIsHistory}}" hint-placeholder-val="{{false}}">
       <div data-screen-label="History" style="display:flex; flex-direction:column; flex:1; min-height:0; overflow:auto; animation:vfade .22s ease;">
-        <div style="padding:24px 30px 18px;">
-          <h1 style="margin:0; font-family:'Martian Mono',monospace; font-size:21px; font-weight:700; letter-spacing:-.02em; color:#f4f3f1;">History &amp; restore points</h1>
-          <p style="margin:9px 0 0; font-size:12.5px; color:#928f8b;">Every tuning session is logged with a system restore point. Roll back to any state.</p>
+        <div style="padding:24px 30px 18px; display:flex; align-items:flex-start; justify-content:space-between; gap:16px;">
+          <div>
+            <h1 style="margin:0; font-family:'Martian Mono',monospace; font-size:21px; font-weight:700; letter-spacing:-.02em; color:#f4f3f1;">History &amp; restore points</h1>
+            <p style="margin:9px 0 0; font-size:12.5px; color:#928f8b;">Every tuning session is logged with a system restore point. Roll back to any state.</p>
+          </div>
+          <button onClick="{{createRestore}}" style="flex:none; height:34px; padding:0 14px; background:#242429; color:#c4c2bf; border:1px solid #3f3f46; border-radius:7px; font-size:12.5px; cursor:pointer; font-family:inherit;" style-hover="background:#2c2c32;border-color:#54545c">Create restore point</button>
         </div>
         <div style="padding:0 30px 26px;">
           <section style="background:#1d1d22; border:1px solid #303036; border-radius:11px; box-shadow:0 1px 2px rgba(0,0,0,.4); overflow:hidden;">
@@ -651,6 +655,7 @@ class Component extends DCLogic {
       history: null,
       benchFps: null,
       cs2: null,
+      restorePoints: null,
       pings: [
         { name: 'Steam (valvesoftware.com)', ms: 53 },
         { name: 'Steam store', ms: 36 },
@@ -782,6 +787,7 @@ class Component extends DCLogic {
     }).then(t => { if (this.arr(t).length) this.setState({ tweaks: this.arr(t) }); }).catch(() => {});
     v.call('getHistory').then(h => this.setState({ history: this.arr(h) })).catch(() => {});
     v.call('getCs2').then(c => this.setState({ cs2: c })).catch(() => {});
+    v.call('getRestorePoints').then(rp => this.setState({ restorePoints: this.arr(rp) })).catch(() => {});
     v.call('getTelemetryHistory', { take: 48 }).then(h => {
       const a = this.arr(h);
       if (a.length) this.setState(s => ({ mon: { ...s.mon, hist: a.map(x => x.gpu), cpuHist: a.map(x => x.cpu) } }));
@@ -817,6 +823,21 @@ class Component extends DCLogic {
     else this.toast('Opening ' + (d && d.name ? d.name.split(' ')[0] : '') + ' driver page...');
   }
   toggleTweak(id) { this.setState(s => ({ tweaks: s.tweaks.map(t => t.id === id ? { ...t, enabled: !t.enabled } : t) })); }
+  revertTweak(id) {
+    const v = window.volante;
+    if (!(v && v.available)) { this.toast('Revert (preview)'); return; }
+    v.call('revertTweaks', { ids: [id] }).then(r => { this.loadLive(); this.toast((r && r.reverted) ? 'Reverted' : 'Nothing to revert'); })
+      .catch(err => this.toast('Revert failed: ' + err.message));
+  }
+  createRestore() {
+    const v = window.volante;
+    if (!(v && v.available)) { this.toast('Restore point (preview)'); return; }
+    this.toast('Creating restore point...');
+    v.call('restorePoint').then(r => {
+      if (r && r.ok) { v.call('getRestorePoints').then(rp => this.setState({ restorePoints: this.arr(rp) })).catch(() => {}); this.toast('Restore point created'); }
+      else { this.toast('Restore point not created (admin / 24h limit)'); }
+    }).catch(err => this.toast('Failed: ' + err.message));
+  }
   toast(msg) { this.setState({ toastMsg: msg }); clearTimeout(this._toast); this._toast = setTimeout(() => this.setState({ toastMsg: '' }), 2200); }
   rerun() {
     if (this.state.scanning) return;
@@ -967,10 +988,10 @@ class Component extends DCLogic {
     }));
 
     const tweaks = s.tweaks.map(t => ({
-      ...t, onToggle: () => this.toggleTweak(t.id),
+      ...t, onToggle: () => this.toggleTweak(t.id), onRevert: () => this.revertTweak(t.id),
       knobTrack: t.enabled ? CC.accent : '#37373d',
       knobX: t.enabled ? '18px' : '2px',
-      valColor: t.enabled ? CC.good : '#6d6a66',
+      valColor: t.applied ? CC.good : (t.enabled ? CC.accent : '#6d6a66'),
     }));
     const enabledList = s.tweaks.filter(t => t.enabled);
     const enabledCount = enabledList.length;
@@ -1100,7 +1121,8 @@ class Component extends DCLogic {
         onRestore: () => { if (active) this.revert(); },
       };
     };
-    const history = (s.history && s.history.length)
+    const rpRows = (s.restorePoints || []).map(rp => hRow(rp.when, '', 'Restore point #' + rp.seq, rp.description, 0, 'Restore point', false));
+    const activityRows = (s.history && s.history.length)
       ? s.history.map(h => hRow(h.when, '', h.text, h.type, 0, h.type === 'revert' ? 'Reverted' : 'Active', h.type !== 'revert'))
       : [
       hRow('Today', '18:42', 'Counter-Strike 2 tune', 'Game Mode, GPU scheduling, +7 more', 9, 'Active', true),
@@ -1109,6 +1131,7 @@ class Component extends DCLogic {
       hRow('Mar 18', '14:05', 'Baseline snapshot', 'Pre-Volante system state', 0, 'Superseded', false),
       hRow('Mar 15', '09:22', 'All-games system tune', 'Visual effects, background apps', 8, 'Superseded', false),
     ];
+    const history = rpRows.concat(activityRows);
 
     return {
       ctxLabel, pipelineLabel: 'pipeline idle',
@@ -1142,6 +1165,7 @@ class Component extends DCLogic {
       goMonitor: () => this.go('monitor'), goHistory: () => this.go('history'),
       apply: () => this.applyTweaks(), preview: () => this.preview(), revert: () => this.revert(),
       saveProfile: () => this.saveProfile(), resetProfile: () => this.resetProfile(),
+      createRestore: () => this.createRestore(),
       profiles, selectedProfileName,
       tweaks, enabledCount, tweakTotal: s.tweaks.length, activeCats,
       applyView, applyTotal, applyDone, applyPctStr: applyPct + '%',

@@ -125,6 +125,30 @@ function Invoke-RevertAllTweaks {
     [pscustomobject]@{ reverted = $n }
 }
 
+function Invoke-RevertTweakIds {
+    param([string[]]$Ids)
+    $cat = Get-TweakCatalog
+    $n = 0
+    foreach ($id in @($Ids)) {
+        $t = $cat | Where-Object Id -eq $id | Select-Object -First 1
+        if ($t -and (Invoke-TweakRevert $t).Result -eq 'Reverted') { $n++ }
+    }
+    if ($n -gt 0) { Add-AppHistory -Type 'revert' -Text "Reverted $n tweak(s)" }
+    [pscustomobject]@{ reverted = $n }
+}
+
+# Real Windows System Restore points (newest first). Needs admin; empty if disabled.
+function Get-AppRestorePoints {
+    try {
+        @(Get-ComputerRestorePoint -ErrorAction Stop | Sort-Object SequenceNumber -Descending |
+            Select-Object -First 10 | ForEach-Object {
+                $when = "$($_.CreationTime)"
+                try { $when = [System.Management.ManagementDateTimeConverter]::ToDateTime($_.CreationTime).ToString('yyyy-MM-dd HH:mm') } catch {}
+                [pscustomobject]@{ seq = $_.SequenceNumber; description = "$($_.Description)"; when = $when }
+            })
+    } catch { @() }
+}
+
 # --- Single entry point the host calls ---------------------------------------
 function Invoke-VolanteCommand {
     param([string]$Message)
@@ -142,6 +166,8 @@ function Invoke-VolanteCommand {
             'applyTweaks'      { Invoke-ApplyTweakIds -Ids @($a.ids) -Profile $a.profile }
             'previewTweaks'    { Invoke-ApplyTweakIds -Ids @($a.ids) -DryRun }
             'revertAll'        { Invoke-RevertAllTweaks }
+            'revertTweaks'     { Invoke-RevertTweakIds -Ids @($a.ids) }
+            'getRestorePoints' { Get-AppRestorePoints }
             'getProfiles'      { Get-AppProfiles }
             'setProfile'       { Set-ActiveProfile -Id $a.id }
             'saveProfile'      { Save-ProfileTweaks -Id $a.id -Ids @($a.ids) }
