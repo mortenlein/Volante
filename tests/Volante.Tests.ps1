@@ -122,6 +122,23 @@ Describe 'Settings' {
     }
 }
 
+Describe 'Config export/import' {
+    It 'round-trips a custom profile set through a file' {
+        InModuleScope Optimizer.Engine {
+            Save-ProfileTweaks -Id 'apex' -Ids @('mouse-accel-off', 'game-mode-on', 'gamedvr-off') | Out-Null
+            $exp = Export-AppConfig
+            $exp.ok | Should Be $true
+            Test-Path -LiteralPath $exp.path | Should Be $true
+            Reset-ProfileTweaks -Id 'apex' | Out-Null
+            (Get-ProfileTweakIds -Id 'apex').Count | Should Not Be 3
+            $imp = Import-AppConfig -Path $exp.path
+            $imp.ok | Should Be $true
+            (Get-ProfileTweakIds -Id 'apex').Count | Should Be 3
+            Reset-ProfileTweaks -Id 'apex' | Out-Null   # cleanup
+        }
+    }
+}
+
 Describe 'Telemetry history persistence' {
     It 'records and reads back samples' {
         InModuleScope Optimizer.Engine {

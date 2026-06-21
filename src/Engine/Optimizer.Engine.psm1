@@ -251,6 +251,7 @@ function Import-OptimizerProfile {
 . (Join-Path $PSScriptRoot 'AppStore.ps1')
 . (Join-Path $PSScriptRoot 'Fps.ps1')
 . (Join-Path $PSScriptRoot 'Cs2.ps1')
+. (Join-Path $PSScriptRoot 'Config.ps1')
 
 # Load the app API (command dispatcher for the WebView2 UI bridge).
 . (Join-Path $PSScriptRoot 'AppApi.ps1')
@@ -267,5 +268,5 @@ Export-ModuleMember -Function `
     Get-AppHistory, Add-AppHistory, `
     Get-PresentMonPath, Get-FpsAvailable, Invoke-FpsBenchmark, `
     Get-Cs2Info, Set-Cs2Autoexec, `
-    Get-AppSettings, Set-AppSettings, `
+    Get-AppSettings, Set-AppSettings, Export-AppConfig, Import-AppConfig, `
     Get-DashboardData, Get-TweakCards, Invoke-VolanteCommand

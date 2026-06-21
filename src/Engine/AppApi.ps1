@@ -176,6 +176,8 @@ function Invoke-VolanteCommand {
             'fpsAvailable'     { [pscustomobject]@{ available = (Get-FpsAvailable) } }
             'getSettings'      { Get-AppSettings }
             'setSettings'      { Set-AppSettings -StaleDriverDays $a.staleDriverDays -MonitorPollMs $a.monitorPollMs -PresentMonPath $a.presentMonPath }
+            'exportConfig'     { Export-AppConfig }
+            'importConfig'     { Import-AppConfig -Path $a.path }
             'getCs2'           { Get-Cs2Info }
             'writeCs2Autoexec' { $r = Set-Cs2Autoexec; if ($r.ok) { Add-AppHistory -Type 'apply' -Text 'Wrote CS2 autoexec.cfg' }; $r }
             'runBenchmark'     {

@@ -656,6 +656,14 @@
             <div style="font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:#928f8b; font-weight:600;">Ping endpoints</div>
             <div style="font-size:11.5px; color:#6d6a66; margin:6px 0 0;">{{settings.endpoints}}</div>
           </section>
+          <section style="background:#1d1d22; border:1px solid #303036; border-radius:11px; padding:16px 18px;">
+            <div style="font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:#928f8b; font-weight:600;">Backup &amp; share</div>
+            <div style="font-size:11.5px; color:#6d6a66; margin:6px 0 12px;">Export your profiles + settings to Documents\Volante\volante-config.json (also copied to clipboard), or import that file back.</div>
+            <div style="display:flex; gap:8px;">
+              <button onClick="{{exportConfig}}" style="height:32px; padding:0 14px; border-radius:7px; cursor:pointer; font-family:inherit; font-size:12px; background:#242429; border:1px solid #3f3f46; color:#c4c2bf;" style-hover="background:#2c2c32;border-color:#54545c">Export config</button>
+              <button onClick="{{importConfig}}" style="height:32px; padding:0 14px; border-radius:7px; cursor:pointer; font-family:inherit; font-size:12px; background:#242429; border:1px solid #3f3f46; color:#c4c2bf;" style-hover="background:#2c2c32;border-color:#54545c">Import config</button>
+            </div>
+          </section>
         </div>
       </div>
       </sc-if>
@@ -744,6 +752,16 @@ class Component extends DCLogic {
     const v = window.volante;
     if (!(v && v.available)) { this.toast('Setting (preview)'); return; }
     v.call('setSettings', { monitorPollMs: ms }).then(g => { this.setState({ settings: g }); this.toast('Monitor interval: ' + (ms / 1000) + 's'); }).catch(() => this.toast('Failed'));
+  }
+  exportConfig() {
+    const v = window.volante;
+    if (!(v && v.available)) { this.toast('Export (preview)'); return; }
+    v.call('exportConfig').then(r => { if (r && r.ok) { this.copyText(r.json); this.toast('Exported to ' + r.path); } else this.toast('Export failed'); }).catch(() => this.toast('Export failed'));
+  }
+  importConfig() {
+    const v = window.volante;
+    if (!(v && v.available)) { this.toast('Import (preview)'); return; }
+    v.call('importConfig').then(r => { if (r && r.ok) { this.loadLive(); this.toast('Imported ' + r.profiles + ' profile set(s)' + (r.settings ? ' + settings' : '')); } else this.toast((r && r.error) ? r.error : 'Import failed'); }).catch(() => this.toast('Import failed'));
   }
   // Real telemetry from the engine; FPS stays simulated until PresentMon (Phase 3).
   pollMonitor() {
@@ -1231,6 +1249,7 @@ class Component extends DCLogic {
       apply: () => this.applyTweaks(), preview: () => this.preview(), revert: () => this.revert(),
       saveProfile: () => this.saveProfile(), resetProfile: () => this.resetProfile(),
       createRestore: () => this.createRestore(),
+      exportConfig: () => this.exportConfig(), importConfig: () => this.importConfig(),
       profiles, selectedProfileName,
       tweaks, enabledCount, tweakTotal: s.tweaks.length, activeCats,
       applyView, applyTotal, applyDone, applyPctStr: applyPct + '%',
