@@ -2,5 +2,16 @@
 Volante.exe
 dist/
 
+# WebView2 SDK DLLs staged next to the exe at build time (source lives in lib\webview2)
+/Microsoft.Web.WebView2.Core.dll
+/Microsoft.Web.WebView2.WinForms.dll
+/WebView2Loader.dll
+
+# Local preview/screenshot artifacts
+_phase*.png
+
+# Dropped design archive (its contents are tracked under design/)
+volante-design.zip
+
 # Signing material - never commit private keys
 *.pfx

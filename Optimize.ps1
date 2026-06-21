@@ -78,15 +78,15 @@ if ($Dashboard) {
 $noAction = -not ($Headless -or $Report -or $Dashboard -or $DryRun -or $Recommended -or $All -or
                   $Apply -or $Revert -or $RevertAll -or $ProfilePath)
 
-# --- GUI mode ----------------------------------------------------------------
+# --- App (GUI) mode ----------------------------------------------------------
+# The UI is now the WebView2 desktop app (Volante.exe): it self-elevates (admin
+# manifest) and renders src\WebUI through the in-process engine bridge. The old
+# WPF GUI (src\GUI) is deprecated/kept as a fallback.
 if ($noAction) {
-    if (-not (Test-IsAdmin) -and -not $NoElevate) {
-        Write-Host 'Elevating for full access (machine tweaks need admin)...'
-        $relaunch = '-NoProfile -ExecutionPolicy Bypass -STA -File "{0}"' -f $PSCommandPath
-        Start-Process powershell.exe -Verb RunAs -ArgumentList $relaunch
-        return
-    }
-    & (Join-Path $PSScriptRoot 'src\GUI\Show-OptimizerGui.ps1') -EnginePath $enginePath
+    $exe = Join-Path $PSScriptRoot 'Volante.exe'
+    if (Test-Path $exe) { Start-Process -FilePath $exe; return }
+    Write-Host 'Volante.exe not found. Build it with: tools\Build-Exe.ps1' -ForegroundColor Yellow
+    Write-Host '(or run headless, e.g.  .\Optimize.ps1 -Dashboard  /  -Report  /  -Headless -Recommended)'
     return
 }
 

@@ -1,0 +1,2 @@
+VER 1.0.4022.49
+Microsoft.Web.WebView2 1.0.4022.49 — extracted from NuGet (api.nuget.org). DLLs: net462 managed + win-x64 native loader.

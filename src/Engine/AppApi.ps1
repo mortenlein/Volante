@@ -1,0 +1,155 @@
+<#
+    Volante app API - the command dispatcher for the WebView2 UI bridge.
+    The C# host hands each UI message (JSON: {id, command, args}) to
+    Invoke-VolanteCommand, which routes to the engine and returns a JSON envelope
+    ({id, ok, data} | {id, ok:false, error}). All routing lives here (in plain,
+    auditable PowerShell) so the C# host stays a dumb pipe. Dot-sourced into
+    Optimizer.Engine.psm1, so engine functions resolve in module scope.
+#>
+
+# --- Projections into the redesign's UI shapes -------------------------------
+function Get-AppRefresh {
+    @(Get-RefreshRateStatus | ForEach-Object {
+        [pscustomobject]@{
+            gpu     = $_.Name
+            res     = ('{0} x {1}' -f $_.Width, $_.Height)
+            hz      = $_.CurrentHz
+            maxHz   = $_.MaxHz
+            device  = $_.Device
+            optimal = [bool]$_.IsOptimal
+            note    = $(if ($_.IsOptimal) { 'Already at the highest supported.' }
+                        else { "Your display supports up to $($_.MaxHz) Hz." })
+        }
+    })
+}
+
+function Get-AppDrivers {
+    @(Get-GpuDriverStatus | ForEach-Object {
+        $ver = $_.DriverVersion
+        if ($_.MarketingVersion) { $ver = "$($_.DriverVersion) - $($_.Vendor) $($_.MarketingVersion)" }
+        [pscustomobject]@{
+            name    = $_.Name
+            version = $ver
+            date    = $(if ($_.DriverDate) { $_.DriverDate.ToString('yyyy-MM-dd') } else { 'unknown' })
+            ago     = $_.AgeDays
+            stale   = [bool]$_.IsStale
+            url     = $_.DownloadUrl
+        }
+    })
+}
+
+function Get-AppPings {
+    @(Get-ValvePing | ForEach-Object {
+        [pscustomobject]@{ name = $_.Label; ms = $_.Ms; best = [bool]$_.Best }
+    })
+}
+
+function Get-AppControlPanel {
+    $cp = Get-GpuControlPanelRecommendations
+    [pscustomobject]@{
+        vendor = $cp.Vendor
+        items  = @($cp.Items | ForEach-Object {
+            $cur = "$($_.Current)"; $rec = "$($_.Recommended)"
+            $cs = 'verify'
+            if     ($cur -eq $rec)        { $cs = 'good' }
+            elseif ($cur -notlike 'Verify*') { $cs = 'warn' }
+            [pscustomobject]@{ name = $_.Setting; rec = $_.Recommended; cur = $_.Current; cs = $cs }
+        })
+    }
+}
+
+function Get-DashboardData {
+    $refresh = Get-AppRefresh
+    $drivers = Get-AppDrivers
+    $pings   = Get-AppPings
+    [pscustomobject]@{
+        refresh   = $refresh
+        drivers   = $drivers
+        pings     = $pings
+        cp        = Get-AppControlPanel
+        readiness = Get-ReadinessFrom -Refresh $refresh -Drivers $drivers -Pings $pings
+    }
+}
+
+# Project the tweak catalog into the design's tweak-card shape. `id` is the real
+# catalog id, so applyTweaks just passes ids straight back to the engine.
+function Get-TweakCards {
+    @(Get-TweakCatalog | ForEach-Object {
+        $s = Invoke-TweakTest $_
+        [pscustomobject]@{
+            id      = $_.Id
+            name    = $_.Name
+            desc    = $_.Description
+            cat     = $_.Category
+            risk    = $_.Risk
+            applied = [bool]$s.Applied
+            value   = $(if ($s.Applied) { 'Applied' } else { 'Off' })
+            enabled = [bool]($_.Recommended -and -not $s.Applied)
+        }
+    })
+}
+
+function Invoke-ApplyTweakIds {
+    param([string[]]$Ids)
+    $cat = Get-TweakCatalog
+    $applied = 0; $failed = 0; $skipped = 0; $reboot = $false
+    if ($Ids -and @($Ids).Count -gt 0 -and (Test-IsAdmin)) { New-OptimizerRestorePoint | Out-Null }
+    foreach ($id in @($Ids)) {
+        $t = $cat | Where-Object Id -eq $id | Select-Object -First 1
+        if (-not $t) { continue }
+        $r = Invoke-TweakApply $t
+        switch ($r.Result) {
+            'Applied' { $applied++; if ($t.RebootRequired) { $reboot = $true } }
+            'Failed'  { $failed++ }
+            'Skipped' { $skipped++ }
+        }
+    }
+    if ($applied -gt 0) { Add-AppHistory -Type 'apply' -Text "Applied $applied tweak(s)" }
+    [pscustomobject]@{ applied = $applied; failed = $failed; skipped = $skipped; reboot = $reboot }
+}
+
+function Invoke-RevertAllTweaks {
+    $n = 0
+    foreach ($t in (Get-TweakCatalog)) {
+        if ((Invoke-TweakRevert $t).Result -eq 'Reverted') { $n++ }
+    }
+    if ($n -gt 0) { Add-AppHistory -Type 'revert' -Text "Reverted $n change(s)" }
+    [pscustomobject]@{ reverted = $n }
+}
+
+# --- Single entry point the host calls ---------------------------------------
+function Invoke-VolanteCommand {
+    param([string]$Message)
+    $id = $null
+    try {
+        $req = $Message | ConvertFrom-Json
+        $id  = $req.id
+        $a   = $req.args
+        $data = switch ($req.command) {
+            'getDashboard'     { Get-DashboardData }
+            'getTweaks'        { Get-TweakCards }
+            'getMonitor'       { Get-MonitorTelemetry }
+            'rerunChecks'      { Add-AppHistory -Type 'check' -Text 'Ran system check'; Get-DashboardData }
+            'applyTweaks'      { Invoke-ApplyTweakIds @($a.ids) }
+            'revertAll'        { Invoke-RevertAllTweaks }
+            'getProfiles'      { Get-AppProfiles }
+            'setProfile'       { Set-ActiveProfile -Id $a.id }
+            'getHistory'       { Get-AppHistory -Take 12 }
+            'fpsAvailable'     { [pscustomobject]@{ available = (Get-FpsAvailable) } }
+            'runBenchmark'     {
+                $b = Invoke-FpsBenchmark -Seconds $(if ($a.seconds) { [int]$a.seconds } else { 20 })
+                if ($b.ok) { Add-AppHistory -Type 'benchmark' -Text "Benchmark: $($b.avg) avg / $($b.low1) 1% low fps" }
+                $b
+            }
+            'setMaxRefresh'    { Set-MaxRefreshRate -Device $a.device -Hz ([int]$a.hz) }
+            'restorePoint'     { [pscustomobject]@{ ok = [bool](New-OptimizerRestorePoint) } }
+            'openControlPanel' { [pscustomobject]@{ ok = [bool](Open-GpuControlPanel -Vendor $a.vendor) } }
+            'openUrl'          { Start-Process $a.url; [pscustomobject]@{ ok = $true } }
+            'isAdmin'          { [pscustomobject]@{ admin = [bool](Test-IsAdmin) } }
+            default            { throw "Unknown command: $($req.command)" }
+        }
+        [pscustomobject]@{ id = $id; ok = $true; data = $data } | ConvertTo-Json -Depth 10 -Compress
+    } catch {
+        [pscustomobject]@{ id = $id; ok = $false; error = "$($_.Exception.Message)" } | ConvertTo-Json -Depth 4 -Compress
+    }
+}

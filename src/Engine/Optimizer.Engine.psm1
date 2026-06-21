@@ -241,10 +241,24 @@ function Import-OptimizerProfile {
 # Load the dashboard diagnostics (read-only system checks shown before tuning).
 . (Join-Path $PSScriptRoot 'Dashboard.ps1')
 
+# Load live telemetry (monitor screen).
+. (Join-Path $PSScriptRoot 'Telemetry.ps1')
+
+# Load app state (readiness, profiles, history) and optional FPS (PresentMon).
+. (Join-Path $PSScriptRoot 'AppStore.ps1')
+. (Join-Path $PSScriptRoot 'Fps.ps1')
+
+# Load the app API (command dispatcher for the WebView2 UI bridge).
+. (Join-Path $PSScriptRoot 'AppApi.ps1')
+
 Export-ModuleMember -Function `
     Write-Log, Set-LogSink, Test-IsAdmin, New-OptimizerRestorePoint, `
     Get-TweakCatalog, Invoke-TweakTest, Invoke-TweakApply, Invoke-TweakRevert, `
     Get-RecommendedIds, Import-OptimizerProfile, Get-BackupRecords, `
     Get-RefreshRateStatus, Set-MaxRefreshRate, Restore-RefreshRate, `
     Get-GpuDriverStatus, Get-ValvePing, Get-ValvePingTargets, `
-    Get-GpuControlPanelRecommendations, Open-GpuControlPanel
+    Get-GpuControlPanelRecommendations, Open-GpuControlPanel, `
+    Get-MonitorTelemetry, `
+    Get-AppProfiles, Set-ActiveProfile, Get-AppHistory, Add-AppHistory, `
+    Get-PresentMonPath, Get-FpsAvailable, Invoke-FpsBenchmark, `
+    Get-DashboardData, Get-TweakCards, Invoke-VolanteCommand

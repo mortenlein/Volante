@@ -29,41 +29,39 @@ not a guessed default.
 - Windows 10/11, **Windows PowerShell 5.1** (built in; the launcher uses it explicitly).
 - Administrator for *machine-scoped* tweaks (the GUI auto-elevates; headless should run elevated / as SYSTEM).
 
-## GUI
+## App (GUI)
 
-Double-click **`Volante.exe`** - a tiny native launcher with an icon that prompts
-for admin automatically (UAC) and opens with no console window. (No exe yet? See
-**Building the launcher** below, or use `Volante.cmd` which does the same thing
-from PowerShell.)
+Double-click **`Volante.exe`** - a native **WebView2 desktop app** with an icon that
+prompts for admin automatically (UAC) and opens with no console window. It renders
+the web UI in `src\WebUI` and talks to the same PowerShell engine in-process through a
+JSON bridge (so the logic stays the auditable `.ps1` engine). (No exe yet? See
+**Building Volante.exe** below.) Requires the Edge **WebView2 Runtime** (ships with
+Windows 11; Evergreen elsewhere).
 
-It opens on a **Dashboard** - a read-only system check shown *before* you tune
-anything (the only change it can make is the optional refresh-rate fix, which you
-confirm):
+Screens:
 
-1. **Monitor refresh rate** - current vs the highest your display supports, with a
-   one-click **Set to max** (validated against supported modes, with a keep/revert prompt).
-2. **GPU driver** - installed version (NVIDIA marketing version decoded), date and age,
-   flagged if it's over ~3 months old, plus a link to the vendor download and Windows Update.
-3. **Ping to Valve / Steam** - TCP-handshake latency to Steam edge endpoints (a routing
-   proxy, not your exact in-game ping; CS2's relays don't answer ICMP).
-4. **CS2 GPU control-panel settings** - the recommended NVIDIA/AMD settings for CS2 with a
-   button that opens your control panel. Values that can't be read safely from outside the
-   driver are marked "Verify in control panel" rather than guessed.
+- **Dashboard** - a "command center" home with a real **readiness score** (computed from
+  applied tweaks, refresh-rate, driver freshness and ping), quick actions and recent activity.
+- **System check** - read-only diagnostics: monitor **refresh rate** (current vs max, with a
+  one-click **Set to max**), **GPU driver** version/age + vendor link, **ping to Valve/Steam**
+  (TCP-handshake latency proxy), and **CS2 GPU control-panel** recommendations.
+- **Tune** - the tweak catalog as toggles by category; **Apply** (restore point first) and
+  **Revert all**, both via the engine.
+- **Monitor** - live hardware telemetry: CPU + per-core, GPU load/temp/clock, VRAM, power,
+  RAM, ping (nvidia-smi + Get-Counter; no bundled binaries). **FPS** needs PresentMon (below).
+- **Games** - per-game profiles (the active profile is persisted).
+- **History** - applied/reverted/benchmark/check events, persisted under `%ProgramData%\Volante`.
 
-From the Dashboard, **Start tuning** opens the wizard and **Advanced mode** opens the
-full list. The tuner itself has two modes:
+### Optional FPS (PresentMon)
 
-**Wizard (default - for everyone):** a guided flow.
-1. **Goals** - pick "Gaming performance" and/or "Privacy & less clutter" (both on by default).
-2. **Review** - plain-language list of what will change, with a restore-point reassurance.
-   Click **Preview (no changes)** to dry-run the whole flow and see exactly what *would*
-   happen without touching anything - then **Apply these now** from the results if you're happy.
-3. **Apply** - one click; a restore point is saved first, then a results screen with an
-   **Undo everything** button and a **Restart now** button if any change needs a reboot.
+To keep the "no bundled binaries" promise, FPS is **opt-in**: FPS and the **benchmark** show
+"n/a" until you add Microsoft's [PresentMon](https://github.com/GameTechDev/PresentMon)
+(MIT). Drop `PresentMon*.exe` on your `PATH` or into one of: `tools\presentmon\`,
+`lib\presentmon\`, or `%ProgramData%\Volante\presentmon\`. Then **Run benchmark** captures
+real frame timing (avg / 1% low / max) while a game is running.
 
-**Advanced mode (for power users):** click "Power user? Open Advanced mode" for the full
-per-tweak list - Recommended/All/Clear presets, Dry Run, Apply/Revert Selected, a live log,
-and a risk badge (Safe / Caution / Advanced) + current state on every tweak.
+> The previous WPF GUI (`src\GUI`) is **deprecated**, kept only as a fallback during the
+> WebView2 migration.
 
 ## Headless / deployment
 
@@ -126,22 +124,27 @@ the wizard and `-Recommended`) is the ~19 lower-risk ones; Advanced/contested tw
 (`hags-on`, `diagtrack-off`, `win32-priority-separation`, `fast-startup-off`,
 `reduce-animations`, `transparency-off`, `gpu-msi-mode`, `nagle-off`) are opt-in.
 
-## Building the launcher (Volante.exe)
+## Building Volante.exe
 
-The exe is a ~13 KB native launcher compiled from `src\Launcher.cs` with an embedded
-icon and admin manifest. It just runs the plain-text `.ps1` engine on disk, so the
-logic stays auditable. Build (or rebuild) it with the always-present .NET Framework
-compiler - no install, no internet:
+`Volante.exe` is a small WebView2 host compiled from `src\Host\VolanteHost.cs` with an
+embedded icon and admin manifest. It hosts the web UI (`src\WebUI`) and runs the
+plain-text `.ps1` engine in-process, so the logic stays auditable. Build it with the
+always-present .NET Framework compiler - no install, no internet needed *at build time*:
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File tools\Build-Exe.ps1
 ```
 
-This (re)generates `assets\gametune.ico` if missing and produces `Volante.exe`.
-The exe is **unsigned**, so first run may show a SmartScreen prompt
-("More info" > "Run anyway"); code-signing is the only thing that removes that.
-For headless/deployment, keep using `Optimize.ps1` / `Volante.cmd` (the exe is
-GUI-only and has no console output).
+This produces `Volante.exe` and stages the WebView2 SDK DLLs next to it. The host
+references the **vendored** Microsoft WebView2 SDK in `lib\webview2` (managed DLLs +
+native `WebView2Loader.dll`) and the GAC `System.Management.Automation`. The DLLs were
+obtained once from the `Microsoft.Web.WebView2` NuGet package (see
+`lib\webview2\VERSION.txt`); re-vendor from NuGet to update. Running the app needs the
+Edge **WebView2 Runtime** (built into Windows 11).
+
+The exe is **unsigned**, so first run may show a SmartScreen prompt ("More info" >
+"Run anyway"); code-signing is the only thing that removes that. For headless/deployment,
+use `Optimize.ps1` / `Volante.cmd` (the engine has full CLI output; the exe is GUI-only).
 
 ## Code-signing (removes SmartScreen warnings)
 

@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="vendor/react.production.min.js"></script>
+<script src="vendor/react-dom.production.min.js"></script>
+<script src="bridge.js"></script>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Martian+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  body{margin:0;background:#16161a;}
+  *{box-sizing:border-box;}
+  @keyframes vspin{to{transform:rotate(360deg)}}
+  @keyframes vrise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  @keyframes vfade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+  @keyframes vpulse{0%{box-shadow:0 0 0 0 rgba(63,192,127,.5)}70%{box-shadow:0 0 0 6px rgba(63,192,127,0)}100%{box-shadow:0 0 0 0 rgba(63,192,127,0)}}
+  ::-webkit-scrollbar{width:10px;height:10px}
+  ::-webkit-scrollbar-thumb{background:#2c2c32;border-radius:20px;border:2px solid transparent;background-clip:content-box}
+  ::-webkit-scrollbar-thumb:hover{background:#37373d;background-clip:content-box}
+  ::-webkit-scrollbar-track{background:transparent}
+</style>
+</helmet>
+<div style="position:fixed; inset:0; display:flex; flex-direction:column; overflow:hidden; font-family:'JetBrains Mono',ui-monospace,Menlo,monospace; font-feature-settings:'ss01','ss02','calt','zero'; color:#c4c2bf; background:radial-gradient(1200px 600px at 80% -10%, rgba(232,162,61,.10), transparent 58%), radial-gradient(900px 500px at 6% 4%, rgba(95,161,223,.07), transparent 55%), #16161a; -webkit-font-smoothing:antialiased;">
+
+  <div style="height:36px; flex:none; display:flex; align-items:center; justify-content:space-between; padding-left:14px; background:rgba(22,22,26,.82); backdrop-filter:blur(14px); border-bottom:1px solid #303036;">
+    <div style="display:flex; align-items:center; gap:10px;">
+      <div style="position:relative; width:20px; height:20px; border-radius:5px; background:linear-gradient(150deg,#e8a23d,#c0742a); box-shadow:0 0 0 1px rgba(232,162,61,.45), 0 4px 12px rgba(232,162,61,.18);"></div>
+      <span style="font-family:'Martian Mono',monospace; font-size:13px; font-weight:700; letter-spacing:-.01em; color:#f4f3f1;">vol<span style="color:#e8a23d;">ante</span></span>
+      <span style="font-size:9.5px; letter-spacing:.2em; text-transform:uppercase; color:#6d6a66; padding-left:11px; margin-left:3px; border-left:1px solid #3f3f46;">{{ctxLabel}}</span>
+    </div>
+    <div style="display:flex; align-items:center; gap:16px;">
+      <button onClick="{{goMonitor}}" style="display:flex; align-items:center; gap:8px; height:26px; padding:0 11px; border-radius:6px; background:#1d1d22; border:1px solid #303036; color:#928f8b; font-size:11px; cursor:pointer; font-family:inherit;" style-hover="border-color:#3f3f46">
+        <span style="width:7px; height:7px; border-radius:50%; background:#3fc07f; animation:vpulse 2.4s infinite;"></span>{{pipelineLabel}}
+      </button>
+      <div style="display:flex; height:36px;">
+        <div style="width:46px; display:flex; align-items:center; justify-content:center; color:#928f8b; cursor:default;" style-hover="background:#242429"><svg width="10" height="10"><line x1="0" y1="5" x2="10" y2="5" stroke="currentColor" stroke-width="1"></line></svg></div>
+        <div style="width:46px; display:flex; align-items:center; justify-content:center; color:#928f8b; cursor:default;" style-hover="background:#242429"><svg width="10" height="10"><rect x="0.5" y="0.5" width="9" height="9" fill="none" stroke="currentColor" stroke-width="1"></rect></svg></div>
+        <div style="width:46px; display:flex; align-items:center; justify-content:center; color:#928f8b; cursor:default;" style-hover="background:#df5340;color:#fff"><svg width="10" height="10"><line x1="0" y1="0" x2="10" y2="10" stroke="currentColor" stroke-width="1"></line><line x1="10" y1="0" x2="0" y2="10" stroke="currentColor" stroke-width="1"></line></svg></div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex; flex:1; min-height:0;">
+
+    <aside style="width:212px; flex:none; display:flex; flex-direction:column; padding:18px 14px; background:rgba(29,29,34,.55); border-right:1px solid #303036;">
+      <div style="display:flex; align-items:center; gap:11px; margin:4px 6px 22px;">
+        <div style="position:relative; width:30px; height:30px; border-radius:8px; flex:none; background:linear-gradient(150deg,#e8a23d,#c0742a); box-shadow:0 0 0 1px rgba(232,162,61,.45), 0 6px 18px rgba(232,162,61,.2);">
+          <span style="position:absolute; left:7px; right:7px; top:13px; height:2px; background:#2a1f0a; opacity:.9;"></span>
+          <span style="position:absolute; left:13px; top:7px; bottom:7px; width:2px; background:#2a1f0a; opacity:.55;"></span>
+        </div>
+        <div>
+          <div style="font-family:'Martian Mono',monospace; font-size:15px; font-weight:700; letter-spacing:-.01em; color:#f4f3f1;">volante</div>
+          <div style="font-size:9px; letter-spacing:.16em; text-transform:uppercase; color:#6d6a66; margin-top:2px;">Game tuner</div>
+        </div>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:2px;">
+        <sc-for list="{{nav}}" as="n" hint-placeholder-count="6">
+          <button onClick="{{n.onClick}}" style="position:relative; display:flex; align-items:center; gap:11px; height:38px; padding:0 11px; border:none; border-radius:7px; cursor:pointer; font-family:inherit; font-size:12.5px; letter-spacing:.01em; text-align:left; background:{{n.bg}}; color:{{n.color}};" style-hover="background:#242429">
+            <span style="position:absolute; left:0; top:9px; bottom:9px; width:2.5px; border-radius:2px; background:{{n.barColor}};"></span>
+            <span style="display:inline-flex; color:{{n.iconColor}};">{{n.icon}}</span>{{n.label}}
+            <sc-if value="{{n.hasBadge}}" hint-placeholder-val="{{false}}"><span style="margin-left:auto; font-size:10px; font-weight:600; color:#2a1f0a; background:#e8a23d; padding:1px 6px; border-radius:5px;">{{n.badge}}</span></sc-if>
+          </button>
+        </sc-for>
+      </div>
+
+      <div style="flex:1;"></div>
+
+      <div style="margin:0 4px 13px; padding:12px; background:#1d1d22; border:1px solid #303036; border-radius:9px;">
+        <div style="display:flex; align-items:center; justify-content:space-between;">
+          <span style="font-size:9.5px; letter-spacing:.16em; text-transform:uppercase; color:#6d6a66;">Readiness</span>
+          <span style="font-family:'Martian Mono',monospace; font-size:15px; font-weight:700; color:#f4f3f1; font-variant-numeric:tabular-nums;">{{ring.score}}</span>
+        </div>
+        <div style="height:5px; border-radius:3px; background:#2c2c32; overflow:hidden; margin-top:8px;">
+          <div style="height:100%; width:{{ring.pct}}; background:#e8a23d; border-radius:3px;"></div>
+        </div>
+      </div>
+
+      <div style="display:flex; flex-wrap:wrap; gap:5px; margin:0 4px 11px;">
+        <span style="font-size:10px; letter-spacing:.03em; color:#928f8b; background:#242429; border:1px solid #303036; padding:3px 7px; border-radius:5px;">RTX 4070 SUPER</span>
+        <span style="font-size:10px; letter-spacing:.03em; color:#928f8b; background:#242429; border:1px solid #303036; padding:3px 7px; border-radius:5px;">Windows 11</span>
+      </div>
+      <button onClick="{{advanced}}" style="margin:0 4px; height:32px; background:#242429; border:1px solid #3f3f46; border-radius:7px; font-size:11.5px; letter-spacing:.02em; color:#c4c2bf; cursor:pointer; font-family:inherit;" style-hover="background:#2c2c32;border-color:#54545c">Advanced mode</button>
+    </aside>
+
+    <main style="flex:1; min-width:0; display:flex; flex-direction:column; min-height:0;">
+
+      <sc-if value="{{screenIsHome}}" hint-placeholder-val="{{false}}">
+      <div data-screen-label="Dashboard" style="display:flex; flex-direction:column; flex:1; min-height:0; overflow:auto; animation:vfade .22s ease;">
+        <div style="padding:26px 30px 30px;">
+          <div style="font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:#6d6a66;">Command center</div>
+          <h1 style="margin:8px 0 0; font-family:'Martian Mono',monospace; font-size:23px; font-weight:700; letter-spacing:-.02em; color:#f4f3f1;">Good evening, ready to play</h1>
+
+          <div style="display:flex; gap:14px; flex-wrap:wrap; margin-top:22px;">
+            <div style="flex:1; min-width:330px; display:flex; align-items:center; gap:22px; background:linear-gradient(135deg,#242429,#1d1d22); border:1px solid #3f3f46; border-radius:16px; padding:22px 24px; position:relative; overflow:hidden;">
+              <div style="position:absolute; right:-30px; top:-30px; width:170px; height:170px; border-radius:50%; background:rgba(232,162,61,.16); filter:blur(40px); pointer-events:none;"></div>
+              <div style="position:relative; width:124px; height:124px; flex:none;">
+                <svg width="124" height="124" viewBox="0 0 124 124" style="transform:rotate(-90deg);">
+                  <circle cx="62" cy="62" r="53" fill="none" stroke="#2c2c32" stroke-width="9"></circle>
+                  <circle cx="62" cy="62" r="53" fill="none" stroke="#e8a23d" stroke-width="9" stroke-linecap="round" stroke-dasharray="{{ring.circ}}" stroke-dashoffset="{{ring.offset}}"></circle>
+                </svg>
+                <div style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                  <span style="font-family:'Martian Mono',monospace; font-size:34px; font-weight:700; letter-spacing:-.03em; line-height:1; color:#f4f3f1; font-variant-numeric:tabular-nums;">{{ring.score}}</span>
+                  <span style="font-size:9px; color:#6d6a66; margin-top:3px; letter-spacing:.14em;">/ 100</span>
+                </div>
+              </div>
+              <div style="flex:1; min-width:0;">
+                <div style="display:inline-flex; align-items:center; gap:6px; height:21px; padding:0 9px; border-radius:5px; background:rgba(224,177,63,.16); color:#e0b13f; font-size:11px; letter-spacing:.05em; text-transform:uppercase;">Good — {{issues}} quick wins</div>
+                <p style="margin:11px 0 16px; font-size:12.5px; line-height:1.55; color:#928f8b;">Your rig is in good shape. Applying the recommended tweaks should lift 1% lows and cut input latency.</p>
+                <div style="display:flex; gap:9px; flex-wrap:wrap;">
+                  <button onClick="{{startTuning}}" style="height:34px; padding:0 16px; background:#e8a23d; color:#2a1f0a; border:none; border-radius:7px; font-size:12.5px; font-weight:600; cursor:pointer; font-family:inherit;" style-hover="filter:brightness(1.08)">Tune now</button>
+                  <button onClick="{{goCheck}}" style="height:34px; padding:0 16px; background:#242429; color:#c4c2bf; border:1px solid #3f3f46; border-radius:7px; font-size:12.5px; cursor:pointer; font-family:inherit;" style-hover="background:#2c2c32;border-color:#54545c">Re-run check</button>
+                </div>
+              </div>
+            </div>
+
+            <div style="flex:1; min-width:300px; display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+              <sc-for list="{{sysStats}}" as="x" hint-placeholder-count="4">
+                <div style="background:#1d1d22; border:1px solid #303036; border-radius:11px; padding:15px 16px;">
+                  <div style="font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:#6d6a66;">{{x.label}}</div>
+                  <div style="font-family:'Martian Mono',monospace; font-size:21px; font-weight:700; letter-spacing:-.02em; margin-top:9px; color:#f4f3f1; font-variant-numeric:tabular-nums;">{{x.value}}<span style="font-size:11px; color:#6d6a66; font-family:'JetBrains Mono',monospace; font-weight:400; margin-left:3px;">{{x.unit}}</span></div>
+                  <div style="font-size:11px; color:#928f8b; margin-top:3px;">{{x.sub}}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-top:14px;">
+            <sc-for list="{{quickActions}}" as="q" hint-placeholder-count="5">
+              <button onClick="{{q.onClick}}" style="display:flex; align-items:center; gap:11px; height:52px; padding:0 16px; border-radius:11px; background:#1d1d22; border:1px solid #303036; color:#c4c2bf; font-size:12.5px; cursor:pointer; font-family:inherit; text-align:left;" style-hover="border-color:rgba(232,162,61,.45);background:#242429">
+                <span style="color:#e8a23d; display:inline-flex; flex:none;">{{q.icon}}</span>{{q.label}}
+              </button>
+            </sc-for>
+          </div>
+
+          <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(310px,1fr)); gap:14px; margin-top:14px;">
+            <section style="background:#1d1d22; border:1px solid #303036; border-radius:11px; padding:16px;">
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+                <span style="font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:#928f8b; font-weight:600;">Active profile</span>
+                <button onClick="{{goTune}}" style="background:none; border:none; color:#e8a23d; font-size:11px; cursor:pointer; font-family:inherit;" style-hover="color:#f0b659">Edit →</button>
+              </div>
+              <div style="font-family:'Martian Mono',monospace; font-size:18px; font-weight:700; color:#f4f3f1;">{{selectedProfileName}}</div>
+              <div style="font-size:11.5px; color:#6d6a66; margin-top:4px;">{{enabledCount}} tweaks active · last applied 2h ago</div>
+              <div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:13px;">
+                <sc-for list="{{activeCats}}" as="c" hint-placeholder-count="4">
+                  <span style="font-size:10px; letter-spacing:.06em; text-transform:uppercase; color:#928f8b; background:#2c2c32; border:1px solid #303036; padding:3px 8px; border-radius:5px;">{{c.name}} {{c.n}}</span>
+                </sc-for>
+              </div>
+            </section>
+
+            <section style="background:#1d1d22; border:1px solid #303036; border-radius:11px; padding:16px;">
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+                <span style="font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:#928f8b; font-weight:600;">Recommended</span>
+                <span style="font-size:11px; color:#6d6a66;">{{issues}} items</span>
+              </div>
+              <div style="display:flex; flex-direction:column; gap:10px;">
+                <sc-for list="{{recommended}}" as="r" hint-placeholder-count="3">
+                  <div style="display:flex; align-items:center; gap:10px;">
+                    <span style="width:6px; height:6px; border-radius:50%; background:#e0b13f; flex:none;"></span>
+                    <span style="font-size:12.5px; color:#c4c2bf; flex:1;">{{r}}</span>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6d6a66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none;"><path d="M9 6l6 6-6 6"></path></svg>
+                  </div>
+                </sc-for>
+              </div>
+            </section>
+
+            <section style="background:#1d1d22; border:1px solid #303036; border-radius:11px; padding:16px;">
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+                <span style="font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:#928f8b; font-weight:600;">Recent activity</span>
+                <button onClick="{{goHistory}}" style="background:none; border:none; color:#e8a23d; font-size:11px; cursor:pointer; font-family:inherit;" style-hover="color:#f0b659">All →</button>
+              </div>
+              <div style="display:flex; flex-direction:column;">
+                <sc-for list="{{recentActivity}}" as="a" hint-placeholder-count="3">
+                  <div style="display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid #303036;">
+                    <span style="width:6px; height:6px; border-radius:50%; background:{{a.color}}; flex:none;"></span>
+                    <span style="font-size:12px; color:#c4c2bf; flex:1; min-width:0;">{{a.text}}</span>
+                    <span style="font-size:10.5px; color:#55524f; flex:none;">{{a.when}}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{screenIsCheck}}" hint-placeholder-val="{{true}}">
+      <div data-screen-label="System check" style="display:flex; flex-direction:column; flex:1; min-height:0; animation:vfade .22s ease;">
+        <div style="flex:none; padding:24px 30px 18px; display:flex; align-items:flex-start; justify-content:space-between; gap:24px;">
+          <div style="max-width:540px;">
+            <h1 style="margin:0; font-family:'Martian Mono',monospace; font-size:21px; font-weight:700; letter-spacing:-.02em; color:#f4f3f1;">System check</h1>
+            <p style="margin:9px 0 0; font-size:12.5px; line-height:1.55; color:#928f8b;">A read-only look at your setup before tuning. Nothing here is changed — the only optional write is the refresh-rate fix, which you confirm.</p>
+          </div>
+          <div style="display:flex; align-items:center; gap:10px; flex:none;">
+            <div style="display:inline-flex; padding:3px; gap:2px; background:#1d1d22; border:1px solid #303036; border-radius:7px;">
+              <button onClick="{{setVA}}" style="border:none; cursor:pointer; font-family:inherit; height:26px; padding:0 11px; font-size:11.5px; letter-spacing:.04em; border-radius:4px; background:{{segBg.A}}; color:{{segFg.A}}; box-shadow:{{segSh.A}};">Stacked</button>
+              <button onClick="{{setVB}}" style="border:none; cursor:pointer; font-family:inherit; height:26px; padding:0 11px; font-size:11.5px; letter-spacing:.04em; border-radius:4px; background:{{segBg.B}}; color:{{segFg.B}}; box-shadow:{{segSh.B}};">Dashboard</button>
+              <button onClick="{{setVC}}" style="border:none; cursor:pointer; font-family:inherit; height:26px; padding:0 11px; font-size:11.5px; letter-spacing:.04em; border-radius:4px; background:{{segBg.C}}; color:{{segFg.C}}; box-shadow:{{segSh.C}};">Focus</button>
+            </div>
+            <button onClick="{{rerun}}" style="display:flex; align-items:center; gap:7px; height:34px; padding:0 13px; background:#242429; color:#c4c2bf; border:1px solid #3f3f46; border-radius:7px; font-size:12px; letter-spacing:.02em; cursor:pointer; font-family:inherit;" style-hover="background:#2c2c32;border-color:#54545c">
+              <span style="display:inline-flex; animation:{{scanAnim}};"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"></path><path d="M21 3v6h-6"></path></svg></span>{{rerunLabel}}
+            </button>
+          </div>
+        </div>
+
+        <div style="flex:1; overflow:auto; padding:0 30px 24px;">
+
+          <sc-if value="{{showHero}}" hint-placeholder-val="{{false}}">
+          <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:16px;">
+            <sc-for list="{{heroStats}}" as="h" hint-placeholder-count="4">
+              <div style="background:#1d1d22; border:1px solid #303036; border-radius:7px; padding:14px 15px; position:relative; overflow:hidden;">
+                <div style="font-family:'Martian Mono',monospace; font-size:26px; font-weight:700; letter-spacing:-.02em; line-height:1; color:{{h.color}}; font-variant-numeric:tabular-nums;">{{h.value}}</div>
+                <div style="margin-top:9px; font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:#6d6a66;">{{h.label}}</div>
+                <div style="font-size:11px; color:#928f8b; margin-top:4px;">{{h.sub}}</div>
+                <div style="position:absolute; left:0; right:0; bottom:0; height:3px; background:{{h.color}}; opacity:.45;"></div>
+              </div>
+            </sc-for>
+          </div>
+          </sc-if>
+
+          <sc-if value="{{showAllClear}}" hint-placeholder-val="{{false}}">
+          <div style="display:flex; align-items:center; gap:10px; background:rgba(63,192,127,.1); border:1px solid rgba(63,192,127,.28); border-radius:7px; padding:11px 15px; margin-bottom:16px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3fc07f" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>
+            <span style="font-size:12px; color:#a9dec0;">{{allClearText}}</span>
+          </div>
+          </sc-if>
+
+          <div style="display:grid; gap:14px; align-items:start; grid-template-columns:{{gridCols}};">
+
+            <sc-if value="{{hasMonitors}}" hint-placeholder-val="{{true}}">
+            <section style="background:#1d1d22; border:1px solid #303036; border-radius:11px; box-shadow:0 1px 2px rgba(0,0,0,.4);">
+              <div style="display:flex; align-items:center; gap:10px; padding:13px 16px; border-bottom:1px solid #303036;">
+                <span style="font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:#928f8b; font-weight:600;">Monitor refresh rate</span>
+              </div>
+              <div style="padding:14px 16px; display:flex; flex-direction:column; gap:13px;">
+                <sc-for list="{{monitors}}" as="m" hint-placeholder-count="3">
+                  <div style="display:flex; align-items:center; gap:13px;">
+                    <span style="width:7px; height:7px; border-radius:50%; background:{{m.color}}; flex:none;"></span>
+                    <div style="flex:1; min-width:0;">
+                      <div style="font-size:12.5px; font-weight:600; color:#f4f3f1;">{{m.gpu}} · {{m.res}}</div>
+                      <div style="font-size:11px; color:#6d6a66; margin-top:2px;">{{m.note}}</div>
+                    </div>
+                    <span style="font-size:13px; font-weight:600; color:{{m.color}}; flex:none; font-variant-numeric:tabular-nums;">{{m.hz}} Hz</span>
+                  </div>
+                </sc-for>
+              </div>
+            </section>
+            </sc-if>
+
+            <section style="background:#1d1d22; border:1px solid #303036; border-radius:11px; box-shadow:0 1px 2px rgba(0,0,0,.4);">
+              <div style="display:flex; align-items:center; gap:10px; padding:13px 16px; border-bottom:1px solid #303036;">
+                <span style="font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:#928f8b; font-weight:600;">GPU driver</span>
+              </div>
+              <div style="padding:14px 16px; display:flex; flex-direction:column; gap:15px;">
+                <sc-for list="{{drivers}}" as="d" hint-placeholder-count="2">
+                  <div style="display:flex; align-items:flex-start; gap:13px;">
+                    <span style="width:7px; height:7px; border-radius:50%; background:{{d.color}}; flex:none; margin-top:5px;"></span>
+                    <div style="flex:1; min-width:0;">
+                      <div style="font-size:12.5px; font-weight:600; color:#f4f3f1;">{{d.name}}</div>
+                      <div style="font-size:11px; color:#6d6a66; margin-top:3px;">{{d.version}}</div>
+                      <div style="display:inline-flex; align-items:center; gap:5px; height:20px; padding:0 7px; border-radius:5px; background:rgba(224,177,63,.16); color:#e0b13f; font-size:10.5px; letter-spacing:.04em; margin-top:7px;">Dated {{d.date}} · {{d.ago}}d ago — update available</div>
+                    </div>
+                    <button onClick="{{d.onGet}}" style="flex:none; height:28px; padding:0 11px; background:#242429; color:#c4c2bf; border:1px solid #3f3f46; border-radius:4px; font-size:11px; letter-spacing:.02em; cursor:pointer; font-family:inherit;" style-hover="background:#2c2c32;border-color:#54545c">Get driver</button>
+                  </div>
+                </sc-for>
+                <button onClick="{{winUpdate}}" style="align-self:flex-start; background:none; border:none; color:#e8a23d; font-size:11.5px; cursor:pointer; font-family:inherit; padding:0;" style-hover="color:#f0b659">Open Windows Update →</button>
+              </div>
+            </section>
+
+            <sc-if value="{{hasPings}}" hint-placeholder-val="{{true}}">
+            <section style="background:#1d1d22; border:1px solid #303036; border-radius:11px; box-shadow:0 1px 2px rgba(0,0,0,.4);">
+              <div style="display:flex; align-items:center; justify-content:space-between; padding:13px 16px; border-bottom:1px solid #303036;">
+                <span style="font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:#928f8b; font-weight:600;">Ping to Valve / Steam</span>
+                <button onClick="{{rerun}}" style="background:none; border:none; color:#e8a23d; font-size:11px; cursor:pointer; font-family:inherit; padding:0;" style-hover="color:#f0b659">Re-test</button>
+              </div>
+              <div style="padding:6px 16px 14px; display:flex; flex-direction:column;">
+                <sc-for list="{{pings}}" as="p" hint-placeholder-count="4">
+                  <div style="display:flex; align-items:center; justify-content:space-between; height:36px; border-bottom:1px solid #303036;">
+                    <span style="font-size:12px; color:#c4c2bf;">{{p.name}}</span>
+                    <span style="font-size:12.5px; font-weight:600; color:{{p.color}}; font-variant-numeric:tabular-nums;">{{p.msText}}{{p.tag}}</span>
+                  </div>
+                </sc-for>
+                <div style="font-size:10.5px; color:#55524f; margin-top:11px; line-height:1.5;">TCP handshake latency to Steam edge endpoints — a routing-latency proxy, not exact in-game ping (CS2 relays don't answer pings).</div>
+              </div>
+            </section>
+            </sc-if>
+
+            <sc-if value="{{hasCp}}" hint-placeholder-val="{{true}}">
+            <section style="background:#1d1d22; border:1px solid #303036; border-radius:11px; box-shadow:0 1px 2px rgba(0,0,0,.4);">
+              <div style="display:flex; align-items:center; justify-content:space-between; padding:13px 16px; border-bottom:1px solid #303036;">
+                <span style="font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:#928f8b; font-weight:600;">CS2 GPU panel · NVIDIA</span>
+                <button onClick="{{controlPanel}}" style="height:28px; padding:0 11px; background:#242429; color:#c4c2bf; border:1px solid #3f3f46; border-radius:4px; font-size:11px; letter-spacing:.02em; cursor:pointer; font-family:inherit;" style-hover="background:#2c2c32;border-color:#54545c">Open panel</button>
+              </div>
+              <div style="padding:4px 16px 14px; display:flex; flex-direction:column;">
+                <sc-for list="{{cp}}" as="c" hint-placeholder-count="7">
+                  <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; height:40px; border-bottom:1px solid #303036;">
+                    <div style="font-size:12px; font-weight:600; color:#f4f3f1; flex:1; min-width:0;">{{c.name}}</div>
+                    <div style="display:flex; align-items:center; gap:14px; flex:none;">
+                      <span style="font-size:11.5px; color:#928f8b;">rec <span style="color:#c4c2bf; font-weight:600;">{{c.rec}}</span></span>
+                      <span style="font-size:11.5px; color:{{c.color}}; min-width:118px; text-align:right;">{{c.cur}}</span>
+                    </div>
+                  </div>
+                </sc-for>
+                <div style="font-size:10.5px; color:#55524f; margin-top:11px; line-height:1.5;">'Verify in panel' = the value can't be read safely from outside the driver — open the panel to set it.</div>
+              </div>
+            </section>
+            </sc-if>
+
+          </div>
+        </div>
+
+        <div style="flex:none; border-top:1px solid #303036; padding:14px 30px; display:flex; align-items:center; justify-content:space-between; background:rgba(22,22,26,.5);">
+          <span style="font-size:11.5px; color:#6d6a66;">Read-only check · {{ring.score}}/100 ready · {{issues}} quick wins</span>
+          <button onClick="{{startTuning}}" style="display:flex; align-items:center; gap:8px; height:36px; padding:0 20px; background:#e8a23d; color:#2a1f0a; border:none; border-radius:7px; font-size:13px; font-weight:600; letter-spacing:.01em; cursor:pointer; font-family:inherit;" style-hover="filter:brightness(1.08)">Start tuning <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13"></path><path d="m13 6 6 6-6 6"></path></svg></button>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{screenIsTuning}}" hint-placeholder-val="{{false}}">
+      <div data-screen-label="Tune" style="display:flex; flex-direction:column; flex:1; min-height:0; animation:vfade .22s ease;">
+        <div style="flex:none; padding:24px 30px 18px;">
+          <h1 style="margin:0; font-family:'Martian Mono',monospace; font-size:21px; font-weight:700; letter-spacing:-.02em; color:#f4f3f1;">Tune &amp; apply</h1>
+          <p style="margin:9px 0 0; font-size:12.5px; color:#928f8b;">Pick a profile, review the tweaks, then apply. A restore point is created first — you can revert anytime.</p>
+        </div>
+        <div style="flex:1; overflow:auto; padding:0 30px 24px;">
+          <div style="font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:#928f8b; font-weight:600; margin-bottom:13px; display:flex; align-items:center; gap:10px;">Game profile<span style="flex:1; height:1px; background:#303036;"></span></div>
+          <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:28px;">
+            <sc-for list="{{profiles}}" as="p" hint-placeholder-count="6">
+              <button onClick="{{p.onSelect}}" style="text-align:left; cursor:pointer; font-family:inherit; padding:13px 15px; border-radius:7px; background:{{p.bg}}; border:{{p.border}};">
+                <div style="font-size:13.5px; font-weight:600; color:#f4f3f1;">{{p.name}}</div>
+                <div style="font-size:11px; color:#6d6a66; margin-top:4px; letter-spacing:.02em;">{{p.tag}}</div>
+              </button>
+            </sc-for>
+          </div>
+
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:13px;">
+            <div style="font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:#928f8b; font-weight:600;">Tweaks · {{selectedProfileName}}</div>
+            <span style="font-size:11.5px; color:#6d6a66; font-variant-numeric:tabular-nums;">{{enabledCount}} of {{tweakTotal}} enabled</span>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <sc-for list="{{tweaks}}" as="t" hint-placeholder-count="6">
+              <div style="display:flex; align-items:center; gap:15px; padding:12px 15px; background:#1d1d22; border:1px solid #303036; border-radius:7px;">
+                <button onClick="{{t.onToggle}}" style="width:38px; height:22px; border-radius:11px; border:none; cursor:pointer; padding:0; position:relative; flex:none; background:{{t.knobTrack}}; transition:background .16s;">
+                  <span style="position:absolute; top:2.5px; left:{{t.knobX}}; width:17px; height:17px; border-radius:50%; background:#f4f3f1; transition:left .16s; box-shadow:0 1px 2px rgba(0,0,0,.5);"></span>
+                </button>
+                <div style="flex:1; min-width:0;">
+                  <div style="display:flex; align-items:center; gap:9px;">
+                    <span style="font-size:13px; font-weight:600; color:#f4f3f1;">{{t.name}}</span>
+                    <span style="font-size:9.5px; font-weight:600; letter-spacing:.1em; color:#928f8b; background:#2c2c32; border:1px solid #303036; padding:2px 7px; border-radius:5px; text-transform:uppercase;">{{t.cat}}</span>
+                  </div>
+                  <div style="font-size:11.5px; color:#6d6a66; margin-top:3px;">{{t.desc}}</div>
+                </div>
+                <span style="font-size:12px; font-weight:600; color:{{t.valColor}}; flex:none;">{{t.value}}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="flex:none; border-top:1px solid #303036; padding:14px 30px; display:flex; align-items:center; justify-content:space-between; background:rgba(22,22,26,.5);">
+          <span style="font-size:11.5px; color:#6d6a66;">Restore point created automatically before applying.</span>
+          <div style="display:flex; gap:9px;">
+            <button onClick="{{goCheck}}" style="height:36px; padding:0 16px; background:#242429; color:#c4c2bf; border:1px solid #3f3f46; border-radius:7px; font-size:12.5px; cursor:pointer; font-family:inherit;" style-hover="background:#2c2c32;border-color:#54545c">Back</button>
+            <button onClick="{{apply}}" style="height:36px; padding:0 20px; background:#e8a23d; color:#2a1f0a; border:none; border-radius:7px; font-size:13px; font-weight:600; cursor:pointer; font-family:inherit;" style-hover="filter:brightness(1.08)">Apply {{enabledCount}} tweaks</button>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{screenIsApplying}}" hint-placeholder-val="{{false}}">
+      <div data-screen-label="Applying" style="display:flex; flex-direction:column; flex:1; min-height:0; align-items:center; justify-content:center; padding:30px; animation:vfade .22s ease;">
+        <div style="width:100%; max-width:520px;">
+          <div style="text-align:center; margin-bottom:26px;">
+            <div style="font-family:'Martian Mono',monospace; font-size:19px; font-weight:700; letter-spacing:-.01em; color:#f4f3f1;">Applying your tweaks</div>
+            <div style="font-size:12.5px; color:#928f8b; margin-top:7px;">Optimising for {{selectedProfileName}} — {{applyDone}} of {{applyTotal}} done</div>
+          </div>
+          <div style="height:6px; background:#2c2c32; border-radius:4px; overflow:hidden; margin-bottom:24px;">
+            <div style="height:100%; width:{{applyPctStr}}; background:#e8a23d; border-radius:4px; transition:width .4s ease;"></div>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:3px;">
+            <sc-for list="{{applyView}}" as="a" hint-placeholder-count="6">
+              <div style="display:flex; align-items:center; gap:13px; padding:9px 12px; border-radius:7px; background:{{a.rowBg}};">
+                <span style="width:20px; height:20px; border-radius:50%; flex:none; display:flex; align-items:center; justify-content:center; background:{{a.dotBg}}; border:{{a.dotBorder}};">
+                  <sc-if value="{{a.showSpin}}" hint-placeholder-val="{{false}}"><span style="display:inline-block; width:11px; height:11px; border:2px solid rgba(42,31,10,.35); border-top-color:#2a1f0a; border-radius:50%; animation:vspin .7s linear infinite;"></span></sc-if>
+                  <span style="font-size:11px; color:{{a.glyphColor}}; font-weight:800;">{{a.glyph}}</span>
+                </span>
+                <span style="font-size:13px; font-weight:500; color:{{a.nameColor}}; flex:1;">{{a.name}}</span>
+                <span style="font-size:11.5px; color:#6d6a66;">{{a.value}}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{screenIsDone}}" hint-placeholder-val="{{false}}">
+      <div data-screen-label="Results" style="display:flex; flex-direction:column; flex:1; min-height:0; animation:vfade .22s ease;">
+        <div style="flex:none; padding:24px 30px 18px; display:flex; align-items:center; gap:14px;">
+          <div style="width:40px; height:40px; border-radius:10px; background:rgba(63,192,127,.13); display:flex; align-items:center; justify-content:center; flex:none;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3fc07f" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>
+          </div>
+          <div>
+            <h1 style="margin:0; font-family:'Martian Mono',monospace; font-size:21px; font-weight:700; letter-spacing:-.02em; color:#f4f3f1;">You're tuned</h1>
+            <p style="margin:6px 0 0; font-size:12.5px; color:#928f8b;">Estimated gains for {{selectedProfileName}}, from the {{enabledCount}} tweaks you applied.</p>
+          </div>
+        </div>
+        <div style="flex:1; overflow:auto; padding:0 30px 24px;">
+          <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:10px; margin-bottom:18px;">
+            <sc-for list="{{kpis}}" as="k" hint-placeholder-count="5">
+              <div style="background:#1d1d22; border:1px solid #303036; border-radius:11px; padding:16px;">
+                <div style="font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:#6d6a66;">{{k.name}}</div>
+                <div style="display:flex; align-items:baseline; gap:7px; margin-top:11px;">
+                  <span style="font-size:12px; color:#55524f; text-decoration:line-through; font-variant-numeric:tabular-nums;">{{k.before}}</span>
+                  <span style="color:#55524f; font-size:11px;">→</span>
+                  <span style="font-family:'Martian Mono',monospace; font-size:24px; font-weight:700; color:#f4f3f1; letter-spacing:-.02em; font-variant-numeric:tabular-nums;">{{k.after}}</span>
+                  <span style="font-size:11px; color:#6d6a66;">{{k.unit}}</span>
+                </div>
+                <div style="display:inline-flex; align-items:center; height:18px; padding:0 7px; border-radius:5px; background:rgba(63,192,127,.14); font-size:11px; font-weight:700; color:#3fc07f; margin-top:9px;">{{k.delta}}</div>
+              </div>
+            </sc-for>
+          </div>
+          <section style="background:#1d1d22; border:1px solid #303036; border-radius:11px; box-shadow:0 1px 2px rgba(0,0,0,.4);">
+            <div style="display:flex; align-items:center; gap:10px; padding:13px 16px; border-bottom:1px solid #303036;">
+              <span style="font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:#928f8b; font-weight:600;">What changed</span>
+            </div>
+            <div style="padding:14px 16px; display:grid; grid-template-columns:repeat(2,1fr); gap:11px 24px;">
+              <sc-for list="{{changed}}" as="ch" hint-placeholder-count="6">
+                <div style="display:flex; align-items:center; gap:10px;">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3fc07f" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="flex:none;"><path d="M20 6 9 17l-5-5"></path></svg>
+                  <span style="font-size:12.5px; color:#c4c2bf; flex:1;">{{ch.name}}</span>
+                  <span style="font-size:11.5px; color:#6d6a66;">{{ch.value}}</span>
+                </div>
+              </sc-for>
+            </div>
+          </section>
+          <div style="font-size:10.5px; color:#55524f; margin-top:14px; line-height:1.5;">Figures are estimates derived from the applied tweaks and your hardware class — not a live benchmark. Run a benchmark to measure exact gains.</div>
+        </div>
+        <div style="flex:none; border-top:1px solid #303036; padding:14px 30px; display:flex; align-items:center; justify-content:space-between; background:rgba(22,22,26,.5);">
+          <button onClick="{{revert}}" style="height:36px; padding:0 16px; background:transparent; color:#df5340; border:1px solid rgba(223,83,64,.35); border-radius:7px; font-size:12.5px; cursor:pointer; font-family:inherit;" style-hover="background:rgba(223,83,64,.1)">Revert all</button>
+          <div style="display:flex; gap:9px;">
+            <button onClick="{{benchmark}}" style="height:36px; padding:0 16px; background:#242429; color:#c4c2bf; border:1px solid #3f3f46; border-radius:7px; font-size:12.5px; cursor:pointer; font-family:inherit;" style-hover="background:#2c2c32;border-color:#54545c">Run benchmark</button>
+            <button onClick="{{goMonitor}}" style="height:36px; padding:0 22px; background:#e8a23d; color:#2a1f0a; border:none; border-radius:7px; font-size:13px; font-weight:600; cursor:pointer; font-family:inherit;" style-hover="filter:brightness(1.08)">View live monitor</button>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{screenIsMonitor}}" hint-placeholder-val="{{false}}">
+      <div data-screen-label="Monitor" style="display:flex; flex-direction:column; flex:1; min-height:0; overflow:auto; animation:vfade .22s ease;">
+        <div style="padding:24px 30px 18px; display:flex; align-items:flex-start; justify-content:space-between; gap:20px;">
+          <div>
+            <h1 style="margin:0; font-family:'Martian Mono',monospace; font-size:21px; font-weight:700; letter-spacing:-.02em; color:#f4f3f1;">Live monitor</h1>
+            <p style="margin:9px 0 0; font-size:12.5px; color:#928f8b;">Real-time hardware telemetry while {{selectedProfileName}} is running.</p>
+          </div>
+          <div style="display:inline-flex; align-items:center; gap:7px; height:28px; padding:0 11px; border-radius:6px; background:rgba(63,192,127,.12); color:#3fc07f; font-size:11px; letter-spacing:.06em; text-transform:uppercase;"><span style="width:6px; height:6px; border-radius:50%; background:#3fc07f; animation:vpulse 2.4s infinite;"></span>Capturing</div>
+        </div>
+        <div style="padding:0 30px 26px; display:flex; flex-direction:column; gap:14px;">
+
+          <div style="display:grid; grid-template-columns:1.5fr 1fr 1fr; gap:14px;">
+            <div style="background:#1d1d22; border:1px solid #303036; border-radius:11px; padding:18px 20px; display:flex; flex-direction:column;">
+              <div style="font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:#6d6a66;">{{mon.perfTitle}}</div>
+              <div style="display:flex; align-items:baseline; gap:8px; margin-top:6px;">
+                <span style="font-family:'Martian Mono',monospace; font-size:46px; font-weight:700; letter-spacing:-.03em; line-height:1; color:#3fc07f; font-variant-numeric:tabular-nums;">{{mon.perfBig}}</span>
+                <span style="font-size:12px; color:#6d6a66;">{{mon.perfSub}}</span>
+              </div>
+              <div style="flex:1; min-height:84px; margin-top:14px;">
+                <svg width="100%" height="92" viewBox="0 0 460 92" preserveAspectRatio="none">
+                  <line x1="0" y1="23" x2="460" y2="23" stroke="#2c2c32" stroke-width="1"></line>
+                  <line x1="0" y1="46" x2="460" y2="46" stroke="#2c2c32" stroke-width="1"></line>
+                  <line x1="0" y1="69" x2="460" y2="69" stroke="#2c2c32" stroke-width="1"></line>
+                  <polyline points="{{mon.areaPath}}" fill="rgba(63,192,127,.1)" stroke="none"></polyline>
+                  <polyline points="{{mon.linePath}}" fill="none" stroke="#3fc07f" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"></polyline>
+                </svg>
+              </div>
+              <div style="display:flex; justify-content:space-between; font-size:10.5px; color:#55524f; margin-top:4px;"><span>avg {{mon.fpsAvg}}%</span><span>min {{mon.fpsLow}}%</span><span>max {{mon.fpsMax}}%</span></div>
+            </div>
+
+            <div style="background:#1d1d22; border:1px solid #303036; border-radius:11px; padding:18px 20px; display:flex; flex-direction:column;">
+              <div style="display:flex; align-items:center; justify-content:space-between;">
+                <span style="font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:#6d6a66;">CPU</span>
+                <span style="font-size:11.5px; color:{{mon.cpuTempColor}};">{{mon.cpuTemp}}°C</span>
+              </div>
+              <div style="font-family:'Martian Mono',monospace; font-size:36px; font-weight:700; letter-spacing:-.03em; color:#f4f3f1; margin-top:6px; font-variant-numeric:tabular-nums;">{{mon.cpu}}<span style="font-size:14px; color:#6d6a66;">%</span></div>
+              <div style="font-size:11px; color:#6d6a66; margin-top:2px;">Ryzen 7 7800X3D</div>
+              <div style="display:flex; gap:3px; align-items:flex-end; height:44px; margin-top:auto;">
+                <sc-for list="{{mon.cores}}" as="c" hint-placeholder-count="8">
+                  <div style="flex:1; display:flex; flex-direction:column; justify-content:flex-end; height:100%;">
+                    <div style="height:{{c.h}}; background:{{c.color}}; border-radius:2px;"></div>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="font-size:10px; color:#55524f; margin-top:6px;">8 cores · 16 threads</div>
+            </div>
+
+            <div style="background:#1d1d22; border:1px solid #303036; border-radius:11px; padding:18px 20px; display:flex; flex-direction:column;">
+              <div style="display:flex; align-items:center; justify-content:space-between;">
+                <span style="font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:#6d6a66;">GPU</span>
+                <span style="font-size:11.5px; color:{{mon.gpuTempColor}};">{{mon.gpuTemp}}°C</span>
+              </div>
+              <div style="font-family:'Martian Mono',monospace; font-size:36px; font-weight:700; letter-spacing:-.03em; color:#f4f3f1; margin-top:6px; font-variant-numeric:tabular-nums;">{{mon.gpu}}<span style="font-size:14px; color:#6d6a66;">%</span></div>
+              <div style="font-size:11px; color:#6d6a66; margin-top:2px;">RTX 4070 SUPER</div>
+              <div style="margin-top:auto; display:flex; flex-direction:column; gap:9px;">
+                <div>
+                  <div style="display:flex; justify-content:space-between; font-size:11px; color:#928f8b; margin-bottom:4px;"><span>Core clock</span><span style="color:#c4c2bf; font-variant-numeric:tabular-nums;">{{mon.gpuClock}} MHz</span></div>
+                  <div style="height:5px; border-radius:3px; background:#2c2c32; overflow:hidden;"><div style="height:100%; width:{{mon.gpuClockPct}}; background:#5fa1df; border-radius:3px;"></div></div>
+                </div>
+                <div>
+                  <div style="display:flex; justify-content:space-between; font-size:11px; color:#928f8b; margin-bottom:4px;"><span>VRAM</span><span style="color:#c4c2bf; font-variant-numeric:tabular-nums;">{{mon.vram}} / 12 GB</span></div>
+                  <div style="height:5px; border-radius:3px; background:#2c2c32; overflow:hidden;"><div style="height:100%; width:{{mon.vramPct}}; background:#5fa1df; border-radius:3px;"></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:14px;">
+            <sc-for list="{{mon.tiles}}" as="t" hint-placeholder-count="4">
+              <div style="background:#1d1d22; border:1px solid #303036; border-radius:11px; padding:15px 17px;">
+                <div style="font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:#6d6a66;">{{t.label}}</div>
+                <div style="font-family:'Martian Mono',monospace; font-size:22px; font-weight:700; letter-spacing:-.02em; color:{{t.color}}; margin-top:8px; font-variant-numeric:tabular-nums;">{{t.value}}<span style="font-size:11px; color:#6d6a66; font-weight:400; margin-left:3px;">{{t.unit}}</span></div>
+                <div style="font-size:11px; color:#928f8b; margin-top:3px;">{{t.sub}}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{screenIsLibrary}}" hint-placeholder-val="{{false}}">
+      <div data-screen-label="Games" style="display:flex; flex-direction:column; flex:1; min-height:0; overflow:auto; animation:vfade .22s ease;">
+        <div style="padding:24px 30px 18px; display:flex; align-items:flex-start; justify-content:space-between; gap:20px;">
+          <div>
+            <h1 style="margin:0; font-family:'Martian Mono',monospace; font-size:21px; font-weight:700; letter-spacing:-.02em; color:#f4f3f1;">Games</h1>
+            <p style="margin:9px 0 0; font-size:12.5px; color:#928f8b;">Per-game tuning profiles. Detected automatically from your library.</p>
+          </div>
+          <button onClick="{{advanced}}" style="height:34px; padding:0 15px; background:#242429; color:#c4c2bf; border:1px solid #3f3f46; border-radius:7px; font-size:12px; cursor:pointer; font-family:inherit;" style-hover="background:#2c2c32;border-color:#54545c">+ Add game</button>
+        </div>
+        <div style="padding:0 30px 26px;">
+          <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:13px;">
+            <sc-for list="{{games}}" as="g" hint-placeholder-count="6">
+              <div style="background:#1d1d22; border:1px solid #303036; border-radius:13px; padding:16px; display:flex; flex-direction:column;">
+                <div style="display:flex; align-items:center; gap:12px;">
+                  <div style="width:42px; height:42px; border-radius:10px; flex:none; display:flex; align-items:center; justify-content:center; font-family:'Martian Mono',monospace; font-size:16px; font-weight:700; background:{{g.iconBg}}; color:{{g.iconColor}};">{{g.abbr}}</div>
+                  <div style="flex:1; min-width:0;">
+                    <div style="font-size:13.5px; font-weight:600; color:#f4f3f1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{g.name}}</div>
+                    <div style="font-size:11px; color:#6d6a66; margin-top:2px;">{{g.tag}}</div>
+                  </div>
+                </div>
+                <div style="display:flex; align-items:center; gap:8px; margin:14px 0 12px;">
+                  <span style="display:inline-flex; align-items:center; gap:5px; height:21px; padding:0 9px; border-radius:5px; background:{{g.statusBg}}; color:{{g.statusColor}}; font-size:10.5px; letter-spacing:.05em; text-transform:uppercase;">{{g.status}}</span>
+                  <span style="font-size:11px; color:#6d6a66;">{{g.tweaksLabel}}</span>
+                </div>
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-top:auto; padding-top:12px; border-top:1px solid #303036;">
+                  <span style="font-size:10.5px; color:#55524f;">{{g.lastPlayed}}</span>
+                  <button onClick="{{g.onTune}}" style="height:28px; padding:0 13px; background:{{g.btnBg}}; color:{{g.btnColor}}; border:{{g.btnBorder}}; border-radius:6px; font-size:11.5px; font-weight:600; cursor:pointer; font-family:inherit;" style-hover="filter:brightness(1.08)">{{g.btnLabel}}</button>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{screenIsHistory}}" hint-placeholder-val="{{false}}">
+      <div data-screen-label="History" style="display:flex; flex-direction:column; flex:1; min-height:0; overflow:auto; animation:vfade .22s ease;">
+        <div style="padding:24px 30px 18px;">
+          <h1 style="margin:0; font-family:'Martian Mono',monospace; font-size:21px; font-weight:700; letter-spacing:-.02em; color:#f4f3f1;">History &amp; restore points</h1>
+          <p style="margin:9px 0 0; font-size:12.5px; color:#928f8b;">Every tuning session is logged with a system restore point. Roll back to any state.</p>
+        </div>
+        <div style="padding:0 30px 26px;">
+          <section style="background:#1d1d22; border:1px solid #303036; border-radius:11px; box-shadow:0 1px 2px rgba(0,0,0,.4); overflow:hidden;">
+            <div style="display:grid; grid-template-columns:140px 1fr 90px 110px 96px; gap:14px; padding:11px 18px; border-bottom:1px solid #303036; font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:#6d6a66;">
+              <span>When</span><span>Session</span><span>Tweaks</span><span>Status</span><span></span>
+            </div>
+            <sc-for list="{{history}}" as="h" hint-placeholder-count="5">
+              <div style="display:grid; grid-template-columns:140px 1fr 90px 110px 96px; gap:14px; align-items:center; padding:14px 18px; border-bottom:1px solid #303036;">
+                <div>
+                  <div style="font-size:12px; color:#c4c2bf;">{{h.date}}</div>
+                  <div style="font-size:10.5px; color:#55524f; margin-top:2px;">{{h.time}}</div>
+                </div>
+                <div>
+                  <div style="font-size:12.5px; font-weight:600; color:#f4f3f1;">{{h.title}}</div>
+                  <div style="font-size:11px; color:#6d6a66; margin-top:2px;">{{h.detail}}</div>
+                </div>
+                <span style="font-size:13px; color:#c4c2bf; font-variant-numeric:tabular-nums;">{{h.tweaks}}</span>
+                <span style="display:inline-flex; align-items:center; gap:5px; height:21px; padding:0 9px; border-radius:5px; background:{{h.statusBg}}; color:{{h.statusColor}}; font-size:10.5px; letter-spacing:.05em; text-transform:uppercase; width:fit-content;">{{h.status}}</span>
+                <button onClick="{{h.onRestore}}" style="height:28px; padding:0 12px; background:#242429; color:{{h.restoreColor}}; border:1px solid #3f3f46; border-radius:6px; font-size:11px; cursor:{{h.restoreCursor}}; font-family:inherit; opacity:{{h.restoreOpacity}};" style-hover="border-color:#54545c">{{h.restoreLabel}}</button>
+              </div>
+            </sc-for>
+          </section>
+          <div style="font-size:10.5px; color:#55524f; margin-top:14px; line-height:1.5;">Restore points are created via Windows System Restore before each apply. Reverting re-runs the inverse of every change in that session.</div>
+        </div>
+      </div>
+      </sc-if>
+
+    </main>
+  </div>
+
+  <sc-if value="{{hasToast}}" hint-placeholder-val="{{false}}">
+  <div style="position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:#242429; border:1px solid #54545c; color:#f4f3f1; font-size:12.5px; padding:11px 18px; border-radius:7px; box-shadow:0 24px 70px rgba(0,0,0,.6); animation:vrise .2s ease;">{{toastMsg}}</div>
+  </sc-if>
+
+  <template id="__bundler_thumbnail">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#16161a"/><rect x="30" y="30" width="40" height="40" rx="10" fill="#e8a23d"/><rect x="40" y="48" width="20" height="3.5" rx="1.75" fill="#2a1f0a"/><rect x="48" y="38" width="3.5" height="20" rx="1.75" fill="#2a1f0a"/></svg>
+  </template>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;$preview&quot;: { &quot;width&quot;: 1320, &quot;height&quot;: 880 },
+  &quot;defaultVariant&quot;: { &quot;editor&quot;: &quot;enum&quot;, &quot;options&quot;: [&quot;A&quot;, &quot;B&quot;, &quot;C&quot;], &quot;default&quot;: &quot;A&quot;, &quot;tsType&quot;: &quot;'A'|'B'|'C'&quot; },
+  &quot;startScreen&quot;: { &quot;editor&quot;: &quot;enum&quot;, &quot;options&quot;: [&quot;home&quot;, &quot;check&quot;, &quot;tuning&quot;, &quot;monitor&quot;, &quot;library&quot;, &quot;history&quot;], &quot;default&quot;: &quot;home&quot;, &quot;tsType&quot;: &quot;string&quot; },
+  &quot;simulatedScore&quot;: { &quot;editor&quot;: &quot;int&quot;, &quot;default&quot;: 78, &quot;min&quot;: 0, &quot;max&quot;: 100, &quot;tsType&quot;: &quot;number&quot; }
+}">
+class Component extends DCLogic {
+  state = (() => {
+    const p = this.props || {};
+    return {
+      screen: p.startScreen || 'home',
+      variant: p.defaultVariant || 'A',
+      profile: 'cs2',
+      scanning: false,
+      toastMsg: '',
+      applyIndex: -1,
+      live: null,
+      history: null,
+      benchFps: null,
+      pings: [
+        { name: 'Steam (valvesoftware.com)', ms: 53 },
+        { name: 'Steam store', ms: 36 },
+        { name: 'Steam API', ms: 36 },
+        { name: 'Steam community', ms: 27, best: true },
+      ],
+      tweaks: [
+        { id: 'gamemode', name: 'Windows Game Mode', desc: 'Prioritises the foreground game for CPU & GPU.', value: 'On', enabled: true, cat: 'System' },
+        { id: 'hags', name: 'Hardware-accelerated GPU scheduling', desc: 'Lets the GPU manage its own memory & scheduling.', value: 'On', enabled: true, cat: 'GPU' },
+        { id: 'powerplan', name: 'Power plan', desc: 'Switch to Ultimate Performance while gaming.', value: 'Ultimate', enabled: true, cat: 'System' },
+        { id: 'gpupower', name: 'GPU power management', desc: 'Prefer maximum performance in the driver.', value: 'Max perf', enabled: true, cat: 'GPU' },
+        { id: 'fso', name: 'Fullscreen optimizations', desc: 'Disable FSO for the game executable.', value: 'Disabled', enabled: true, cat: 'GPU' },
+        { id: 'mouseaccel', name: 'Mouse acceleration', desc: 'Turn off "Enhance pointer precision".', value: 'Off', enabled: true, cat: 'Input' },
+        { id: 'gamedvr', name: 'Game DVR / Xbox Game Bar', desc: 'Disable background recording overhead.', value: 'Disabled', enabled: true, cat: 'System' },
+        { id: 'netthrottle', name: 'Network throttling index', desc: 'Remove the 10-packet multimedia throttle.', value: 'Disabled', enabled: true, cat: 'Network' },
+        { id: 'nagle', name: "Nagle's algorithm (TCP)", desc: 'Disable packet coalescing for lower latency.', value: 'Disabled', enabled: true, cat: 'Network' },
+        { id: 'visualfx', name: 'Visual effects', desc: 'Bias Windows animations toward performance.', value: 'Best perf', enabled: false, cat: 'System' },
+        { id: 'bgapps', name: 'Background apps', desc: 'Restrict apps from running in the background.', value: 'Restricted', enabled: false, cat: 'System' },
+      ],
+      mon: {
+        fps: 312, frameMs: 3.2, cpu: 41, cpuTemp: 58, gpu: 71, gpuTemp: 64, gpuClock: 2610, vram: 8.4, ping: 27, power: 264,
+        cores: [44, 38, 52, 31, 47, 29, 61, 35],
+        hist: Array.from({ length: 48 }, (_, i) => 45 + Math.round(Math.sin(i / 3) * 10 + (Math.random() - 0.5) * 8)), // GPU-load baseline
+      },
+    };
+  })();
+
+  componentDidMount() {
+    this.loadLive();
+    this._mt = setInterval(() => {
+      if (this.state.screen !== 'monitor') return;
+      const v = window.volante;
+      if (v && v.available) { this.pollMonitor(); return; }
+      this.simTick();
+    }, 1000);
+  }
+  // Real telemetry from the engine; FPS stays simulated until PresentMon (Phase 3).
+  pollMonitor() {
+    if (this._monBusy) return;
+    this._monBusy = true;
+    window.volante.call('getMonitor').then(t => {
+      this._monBusy = false;
+      this.setState(s => {
+        const m = s.mon;
+        const cores = (t.cores && t.cores.length) ? t.cores : m.cores;
+        const hist = m.hist.slice(1).concat(typeof t.gpu === 'number' ? t.gpu : 0); // chart = real GPU load
+        return { mon: { ...m, ...t, cores, hist } };
+      });
+    }).catch(() => { this._monBusy = false; });
+  }
+  // Full simulation for the design preview (browser, no host bridge).
+  simTick() {
+    this.setState(s => {
+      const j = (v, lo, hi, amt) => Math.max(lo, Math.min(hi, v + (Math.random() - 0.5) * amt));
+      const m = s.mon;
+      const fps = Math.round(j(m.fps, 250, 360, 26));
+      const gpu = Math.round(j(m.gpu, 58, 96, 12));
+      const hist = m.hist.slice(1).concat(gpu); // chart mirrors the app: GPU load
+      return {
+        mon: {
+          ...m, fps, frameMs: +(1000 / fps).toFixed(1),
+          cpu: Math.round(j(m.cpu, 28, 72, 14)), cpuTemp: Math.round(j(m.cpuTemp, 52, 72, 4)),
+          gpu, gpuTemp: Math.round(j(m.gpuTemp, 58, 76, 4)),
+          gpuClock: Math.round(j(m.gpuClock, 2520, 2730, 60)), vram: +j(m.vram, 7.2, 10.4, .6).toFixed(1),
+          ping: Math.round(j(m.ping, 22, 38, 5)), power: Math.round(j(m.power, 230, 310, 24)),
+          cores: m.cores.map(c => Math.round(j(c, 18, 96, 30))), hist,
+        },
+      };
+    });
+  }
+  componentWillUnmount() { if (this._t) clearInterval(this._t); if (this._mt) clearInterval(this._mt); clearTimeout(this._toast); }
+
+  go(screen) { this.setState({ screen }); }
+  setVariant(v) { this.setState({ variant: v }); }
+  selectProfile(id) {
+    this.setState({ profile: id });
+    const v = window.volante;
+    if (v && v.available) v.call('setProfile', { id: id }).catch(() => {});
+  }
+  benchmark() {
+    const v = window.volante;
+    if (!(v && v.available)) { this.toast('Launching benchmark...'); return; }
+    this.toast('Benchmarking ~20s - play your game...');
+    v.call('runBenchmark', { seconds: 20 }).then(b => {
+      if (b && b.ok) { this.loadLive(); this.setState({ benchFps: b.avg }); this.toast('Benchmark: ' + b.avg + ' avg / ' + b.low1 + ' 1% low fps'); }
+      else { this.toast((b && b.error) ? b.error : 'Benchmark unavailable'); }
+    }).catch(err => this.toast('Benchmark failed: ' + err.message));
+  }
+  arr(x) { return Array.isArray(x) ? x : (x == null ? [] : [x]); }
+  loadLive() {
+    const v = window.volante;
+    if (!v || !v.available) return;
+    v.call('getDashboard').then(d => this.setState({ live: d, pings: this.arr(d && d.pings).length ? this.arr(d.pings) : this.state.pings })).catch(() => {});
+    v.call('getTweaks').then(t => { if (this.arr(t).length) this.setState({ tweaks: this.arr(t) }); }).catch(() => {});
+    v.call('getProfiles').then(p => { if (p && p.active) this.setState({ profile: p.active }); }).catch(() => {});
+    v.call('getHistory').then(h => this.setState({ history: this.arr(h) })).catch(() => {});
+  }
+  openUrl(u) {
+    const v = window.volante;
+    if (v && v.available) v.call('openUrl', { url: u }).catch(() => {});
+    else this.toast('Open: ' + u);
+  }
+  openControlPanel() {
+    const v = window.volante;
+    const vendor = (this.state.live && this.state.live.cp && this.state.live.cp.vendor) || 'NVIDIA';
+    this.toast('Opening ' + vendor + ' control panel...');
+    if (v && v.available) v.call('openControlPanel', { vendor: vendor }).catch(() => {});
+  }
+  getDriver(d) {
+    const v = window.volante;
+    if (v && v.available && d && d.url) { this.toast('Opening driver page...'); v.call('openUrl', { url: d.url }).catch(() => {}); }
+    else this.toast('Opening ' + (d && d.name ? d.name.split(' ')[0] : '') + ' driver page...');
+  }
+  toggleTweak(id) { this.setState(s => ({ tweaks: s.tweaks.map(t => t.id === id ? { ...t, enabled: !t.enabled } : t) })); }
+  toast(msg) { this.setState({ toastMsg: msg }); clearTimeout(this._toast); this._toast = setTimeout(() => this.setState({ toastMsg: '' }), 2200); }
+  rerun() {
+    if (this.state.scanning) return;
+    const v = window.volante;
+    this.setState({ scanning: true });
+    if (v && v.available) {
+      v.call('rerunChecks').then(d => {
+        this.setState({ scanning: false, live: d, pings: (d && d.pings && d.pings.length) ? d.pings : this.state.pings });
+        this.toast('Checks refreshed');
+      }).catch(err => { this.setState({ scanning: false }); this.toast('Check failed: ' + err.message); });
+      return;
+    }
+    setTimeout(() => {
+      this.setState(s => ({ scanning: false, pings: s.pings.map(p => ({ ...p, ms: Math.max(18, p.ms + Math.round((Math.random() - 0.5) * 10)) })) }));
+      this.toast('Checks refreshed');
+    }, 1500);
+  }
+  applyTweaks() {
+    const total = this.state.tweaks.filter(t => t.enabled).length;
+    if (!total) { this.toast('Select at least one tweak'); return; }
+    this.setState({ screen: 'applying', applyIndex: 0 });
+    const v = window.volante;
+    if (v && v.available) {
+      v.call('applyTweaks', { ids: this.state.tweaks.filter(t => t.enabled).map(t => t.id) })
+        .then(r => { this.loadLive(); this.toast('Applied ' + (r.applied || 0) + ' tweak(s)' + (r.skipped ? ', ' + r.skipped + ' need admin' : '')); })
+        .catch(err => this.toast('Apply failed: ' + err.message));
+    }
+    if (this._t) clearInterval(this._t);
+    this._t = setInterval(() => {
+      this.setState(s => {
+        const next = s.applyIndex + 1;
+        if (next > total) { clearInterval(this._t); setTimeout(() => this.setState({ screen: 'done', applyIndex: -1 }), 500); return {}; }
+        return { applyIndex: next };
+      });
+    }, 480);
+  }
+  revert() {
+    const v = window.volante;
+    if (v && v.available) {
+      v.call('revertAll').then(r => { this.loadLive(); this.setState({ screen: 'check' }); this.toast('Reverted ' + (r.reverted || 0) + ' change(s)'); }).catch(err => this.toast('Revert failed: ' + err.message));
+      return;
+    }
+    this.setState({ screen: 'check' }); this.toast('Tweaks reverted — system restored from restore point');
+  }
+
+  ic(name) {
+    const P = {
+      home: 'M4 11l8-7 8 7 M6 10v9h12v-9',
+      check: 'M12 3l7 3v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z M9 12l2 2 4-4',
+      tune: 'M4 7h10 M18 7h2 M4 12h4 M12 12h8 M4 17h12 M18 17h2 M14 5v4 M8 10v4 M16 15v4',
+      monitor: 'M3 12h4l2 6 4-14 2 8h6',
+      games: 'M7 9h2 M8 8v2 M15 9h.01 M17 11h.01 M6 6h12a3 3 0 013 3l-1 6a3 3 0 01-3 2.5c-1.5 0-2.2-1-3-2h-6c-.8 1-1.5 2-3 2A3 3 0 013 15L2 9a3 3 0 013-3z',
+      history: 'M3 12a9 9 0 1 0 3-6.7L3 8 M3 4v4h4 M12 8v4l3 2',
+    };
+    return React.createElement('svg', { width: 16, height: 16, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.7, strokeLinecap: 'round', strokeLinejoin: 'round' }, React.createElement('path', { d: P[name] }));
+  }
+
+  renderVals() {
+    const s = this.state;
+    const CC = { good: '#3fc07f', warn: '#e0b13f', verify: '#6d6a66', bad: '#df5340', accent: '#e8a23d', accentInk: '#2a1f0a', ct: '#5fa1df' };
+
+    const profDefs = [
+      { id: 'cs2', name: 'Counter-Strike 2', tag: 'FPS · competitive' },
+      { id: 'valorant', name: 'Valorant', tag: 'FPS · tactical' },
+      { id: 'apex', name: 'Apex Legends', tag: 'Battle royale' },
+      { id: 'fortnite', name: 'Fortnite', tag: 'BR · building' },
+      { id: 'lol', name: 'League of Legends', tag: 'MOBA' },
+      { id: 'global', name: 'All games', tag: 'System-wide' },
+    ];
+    const selectedProfileName = (profDefs.find(p => p.id === s.profile) || {}).name || '';
+
+    const score = (s.live && s.live.readiness && typeof s.live.readiness.score === 'number') ? s.live.readiness.score : ((this.props && typeof this.props.simulatedScore === 'number') ? this.props.simulatedScore : 78);
+    const circ = Math.round(2 * Math.PI * 53);
+    const ring = { circ, offset: Math.round(circ * (1 - score / 100)), score, pct: score + '%' };
+    const issues = (s.live && s.live.readiness && typeof s.live.readiness.issues === 'number') ? s.live.readiness.issues : 3;
+
+    const navActive = (s.screen === 'applying' || s.screen === 'done') ? 'tune' : s.screen;
+    const navDefs = [
+      { key: 'home', label: 'Dashboard' },
+      { key: 'check', label: 'System check' },
+      { key: 'tune', label: 'Tune', badge: String(issues) },
+      { key: 'monitor', label: 'Monitor' },
+      { key: 'library', label: 'Games' },
+      { key: 'history', label: 'History' },
+    ];
+    const nav = navDefs.map(n => {
+      const on = navActive === n.key;
+      return {
+        label: n.label, icon: this.ic(n.key),
+        onClick: () => this.go(n.key === 'tune' ? 'tuning' : n.key),
+        bg: on ? '#242429' : 'transparent',
+        color: on ? '#f4f3f1' : '#928f8b',
+        iconColor: on ? '#e8a23d' : '#6d6a66',
+        barColor: on ? '#e8a23d' : 'transparent',
+        hasBadge: !!n.badge, badge: n.badge,
+      };
+    });
+
+    const ctxMap = { home: 'COMMAND CENTER', check: 'SYSTEM CHECK', tuning: 'TUNE', applying: 'APPLYING', done: 'RESULTS', monitor: 'LIVE MONITOR', library: 'GAMES', history: 'HISTORY' };
+    const ctxLabel = ctxMap[s.screen] || '';
+
+    const monitorsAll = ((s.live && s.live.refresh) || [
+      { gpu: 'RTX 4070 SUPER', res: '2560 × 1440', hz: 144, note: 'Already at the highest supported.', optimal: true },
+      { gpu: 'RTX 4070 SUPER', res: '1080 × 1920', hz: 60, note: 'Already at the highest supported.', optimal: true },
+      { gpu: 'RTX 4070 SUPER', res: '3840 × 2160', hz: 60, note: 'Already at the highest supported.', optimal: true },
+    ]).map(m => ({ ...m, color: m.optimal === false ? CC.warn : CC.good }));
+    const drivers = ((s.live && s.live.drivers) || [
+      { name: 'NVIDIA GeForce RTX 4070 SUPER', version: '32.0.15.9579 · NVIDIA 595.79', date: '2026-03-04', ago: 109, stale: true },
+      { name: 'AMD Radeon(TM) Graphics', version: '32.0.21043.5001', date: '2026-03-03', ago: 110, stale: true },
+    ]).map(d => ({ ...d, color: d.stale ? CC.warn : CC.good, onGet: () => this.getDriver(d) }));
+    const pingsAll = s.pings.map(p => ({
+      name: p.name, ms: p.ms, msText: (p.ms == null ? 'timeout' : p.ms + ' ms'),
+      color: p.ms == null ? CC.bad : p.ms <= 40 ? CC.good : p.ms <= 80 ? CC.warn : CC.bad,
+      tag: p.best ? '  (best)' : '',
+    }));
+    const cpAll = ((s.live && s.live.cp && s.live.cp.items) || [
+      { name: 'Hardware-accelerated GPU scheduling', rec: 'On', cur: 'Default (not set)', cs: 'warn' },
+      { name: 'Low Latency Mode', rec: 'Ultra', cur: 'Verify in panel', cs: 'verify' },
+      { name: 'Power management mode', rec: 'Prefer max performance', cur: 'Verify in panel', cs: 'verify' },
+      { name: 'Texture filtering — Quality', rec: 'High performance', cur: 'Verify in panel', cs: 'verify' },
+      { name: 'Vertical sync', rec: 'Off', cur: 'Verify in panel', cs: 'verify' },
+      { name: 'Threaded optimization', rec: 'On', cur: 'Verify in panel', cs: 'verify' },
+      { name: 'Monitor technology', rec: 'G-SYNC (if supported)', cur: 'Verify in panel', cs: 'verify' },
+    ]).map(x => ({ ...x, color: x.cs === 'good' ? CC.good : x.cs === 'warn' ? CC.warn : CC.verify }));
+
+    const isFocus = s.variant === 'C';
+    const monitors = isFocus ? monitorsAll.filter(m => m.color !== CC.good) : monitorsAll;
+    const pings = isFocus ? pingsAll.filter(p => p.color !== CC.good) : pingsAll;
+    const cp = isFocus ? cpAll.filter(x => x.cs === 'warn') : cpAll;
+
+    const heroStats = [
+      { label: 'Readiness', value: score, sub: 'Good — quick wins', color: '#f4f3f1' },
+      { label: 'Quick wins', value: issues, sub: 'items to improve', color: CC.warn },
+      { label: 'Best ping', value: '27', sub: 'ms · Steam community', color: CC.good },
+      { label: 'Displays', value: '3', sub: 'all at max refresh', color: CC.good },
+    ];
+
+    const seg = v => s.variant === v;
+    const segBg = { A: seg('A') ? '#2c2c32' : 'transparent', B: seg('B') ? '#2c2c32' : 'transparent', C: seg('C') ? '#2c2c32' : 'transparent' };
+    const segFg = { A: seg('A') ? '#f4f3f1' : '#928f8b', B: seg('B') ? '#f4f3f1' : '#928f8b', C: seg('C') ? '#f4f3f1' : '#928f8b' };
+    const segSh = { A: seg('A') ? '0 1px 2px rgba(0,0,0,.4)' : 'none', B: seg('B') ? '0 1px 2px rgba(0,0,0,.4)' : 'none', C: seg('C') ? '0 1px 2px rgba(0,0,0,.4)' : 'none' };
+
+    const profiles = profDefs.map(p => ({
+      ...p, selected: s.profile === p.id, onSelect: () => this.selectProfile(p.id),
+      bg: s.profile === p.id ? 'rgba(232,162,61,.16)' : '#1d1d22',
+      border: s.profile === p.id ? '1px solid rgba(232,162,61,.45)' : '1px solid #303036',
+    }));
+
+    const tweaks = s.tweaks.map(t => ({
+      ...t, onToggle: () => this.toggleTweak(t.id),
+      knobTrack: t.enabled ? CC.accent : '#37373d',
+      knobX: t.enabled ? '18px' : '2px',
+      valColor: t.enabled ? CC.good : '#6d6a66',
+    }));
+    const enabledList = s.tweaks.filter(t => t.enabled);
+    const enabledCount = enabledList.length;
+
+    const catCount = {};
+    enabledList.forEach(t => { catCount[t.cat] = (catCount[t.cat] || 0) + 1; });
+    const activeCats = Object.keys(catCount).map(k => ({ name: k, n: catCount[k] }));
+
+    const applyView = enabledList.map((t, i) => {
+      const st = s.applyIndex > i ? 'done' : s.applyIndex === i ? 'active' : 'pending';
+      return {
+        name: t.name, value: t.value, showSpin: st === 'active',
+        glyph: st === 'done' ? '✓' : '', glyphColor: CC.accentInk,
+        dotBg: st === 'done' ? CC.good : st === 'active' ? CC.accent : 'transparent',
+        dotBorder: st === 'pending' ? '1px solid #3f3f46' : '1px solid transparent',
+        nameColor: st === 'pending' ? '#6d6a66' : '#f4f3f1',
+        rowBg: st === 'active' ? 'rgba(232,162,61,.08)' : 'transparent',
+      };
+    });
+    const applyTotal = enabledList.length;
+    const applyDone = Math.max(0, Math.min(s.applyIndex, applyTotal));
+    const applyPct = applyTotal ? Math.round(applyDone / applyTotal * 100) : 0;
+
+    const kpis = [
+      { name: 'Average FPS', before: '312', after: '347', unit: 'fps', delta: '+11%' },
+      { name: '1% low FPS', before: '198', after: '241', unit: 'fps', delta: '+22%' },
+      { name: 'Frame-time variance', before: '4.8', after: '2.9', unit: 'ms', delta: '−40%' },
+      { name: 'Input latency', before: '11.4', after: '7.8', unit: 'ms', delta: '−32%' },
+      { name: 'DPC latency', before: '920', after: '410', unit: 'µs', delta: '−55%' },
+    ];
+    const changed = enabledList.map(t => ({ name: t.name, value: t.value }));
+
+    // dashboard
+    const sysStats = [
+      { label: 'CPU', value: '7800X3D', unit: '', sub: '8C · 16T · 58°C' },
+      { label: 'GPU', value: '4070S', unit: '', sub: '12 GB · 64°C' },
+      { label: 'Memory', value: '32', unit: 'GB', sub: 'DDR5-6000' },
+      { label: 'Power plan', value: 'Ultimate', unit: '', sub: 'active now' },
+    ];
+    const quickActions = [
+      { label: 'Run system check', icon: this.ic('check'), onClick: () => this.go('check') },
+      { label: 'Tune now', icon: this.ic('tune'), onClick: () => this.go('tuning') },
+      { label: 'Live monitor', icon: this.ic('monitor'), onClick: () => this.go('monitor') },
+      { label: 'Game profiles', icon: this.ic('games'), onClick: () => this.go('library') },
+      { label: 'Restore points', icon: this.ic('history'), onClick: () => this.go('history') },
+    ];
+    const recommended = ['Update NVIDIA & AMD drivers', 'Enable GPU scheduling in panel', 'Apply CS2 control-panel preset'];
+    const histColor = cs => cs === 'warn' ? CC.warn : cs === 'ct' ? CC.ct : cs === 'bad' ? CC.bad : CC.good;
+    const recentActivity = (s.history && s.history.length)
+      ? s.history.slice(0, 4).map(h => ({ text: h.text, when: h.when, color: histColor(h.cs) }))
+      : [
+      { text: 'Applied 9 tweaks · Counter-Strike 2', when: '2h ago', color: CC.good },
+      { text: 'Driver check — 2 updates found', when: '2h ago', color: CC.warn },
+      { text: 'Restore point created', when: '2h ago', color: CC.ct },
+      { text: 'System check — 78/100', when: 'yesterday', color: CC.good },
+    ];
+
+    // monitor derived — big chart shows live GPU load (real); FPS comes from the benchmark.
+    const m = s.mon;
+    const W = 460, H = 92;
+    const hvals = m.hist.length ? m.hist : [0];
+    let lo = Math.min.apply(null, hvals), hi = Math.max.apply(null, hvals);
+    if (hi - lo < 1) { lo = Math.max(0, lo - 1); hi = lo + 2; }
+    const pts = m.hist.map((v, i) => {
+      const x = (i / Math.max(1, m.hist.length - 1)) * W;
+      const y = H - ((v - lo) / (hi - lo)) * H;
+      return x.toFixed(1) + ',' + Math.max(2, Math.min(H - 2, y)).toFixed(1);
+    });
+    const linePath = pts.join(' ');
+    const areaPath = '0,' + H + ' ' + linePath + ' ' + W + ',' + H;
+    const sorted = [...m.hist].sort((a, b) => a - b);
+    const fpsAvg = Math.round(m.hist.reduce((a, b) => a + b, 0) / Math.max(1, m.hist.length));
+    const fpsLow = Math.round(sorted[0] || 0);
+    const fpsMax = Math.round(sorted[sorted.length - 1] || 0);
+    const ramUsed = (m.ramUsed != null) ? m.ramUsed : 14.2;
+    const ramTotal = (m.ramTotal != null && m.ramTotal > 0) ? m.ramTotal : 32;
+    const monView = {
+      perfTitle: 'GPU load', perfBig: m.gpu, perfSub: '% · ' + m.gpuClock + ' MHz',
+      fpsAvg, fpsLow, fpsMax, linePath, areaPath,
+      cpu: m.cpu, cpuTemp: (m.cpuTemp == null ? '--' : m.cpuTemp), cpuTempColor: (m.cpuTemp != null && m.cpuTemp >= 70) ? CC.warn : CC.good,
+      gpu: m.gpu, gpuTemp: m.gpuTemp, gpuTempColor: m.gpuTemp >= 74 ? CC.warn : CC.good,
+      gpuClock: m.gpuClock, gpuClockPct: Math.max(0, Math.min(100, Math.round((m.gpuClock - 2400) / (2750 - 2400) * 100))) + '%',
+      vram: m.vram.toFixed(1), vramPct: Math.max(0, Math.min(100, Math.round(m.vram / 12 * 100))) + '%',
+      cores: m.cores.map(c => ({ h: c + '%', color: c >= 80 ? CC.warn : '#e8a23d' })),
+      tiles: [
+        { label: 'FPS (benchmark)', value: (s.benchFps != null ? s.benchFps : 'n/a'), unit: '', sub: 'Run benchmark', color: '#f4f3f1' },
+        { label: 'Network', value: (m.ping == null ? 'n/a' : m.ping), unit: 'ms', sub: 'Steam', color: (m.ping != null && m.ping <= 35) ? CC.good : CC.warn },
+        { label: 'GPU power', value: m.power, unit: 'W', sub: 'board draw', color: '#f4f3f1' },
+        { label: 'RAM in use', value: ramUsed, unit: 'GB', sub: 'of ' + ramTotal + ' GB', color: '#f4f3f1' },
+      ],
+    };
+
+    // games library
+    const gd = (id, name, tag, abbr, hue, status) => {
+      const tuned = status === 'tuned';
+      return {
+        name, tag, abbr,
+        iconBg: 'rgba(' + hue + ',.16)', iconColor: 'rgb(' + hue + ')',
+        status: tuned ? 'Tuned' : 'Not tuned',
+        statusBg: tuned ? 'rgba(63,192,127,.14)' : '#2c2c32',
+        statusColor: tuned ? CC.good : '#928f8b',
+        tweaksLabel: tuned ? '9 tweaks' : '—',
+        lastPlayed: tuned ? 'Played 2h ago' : 'Played ' + (id === 'lol' ? '3d' : id === 'apex' ? '1d' : '5d') + ' ago',
+        btnLabel: tuned ? 'Re-tune' : 'Tune',
+        btnBg: tuned ? '#242429' : '#e8a23d',
+        btnColor: tuned ? '#c4c2bf' : '#2a1f0a',
+        btnBorder: tuned ? '1px solid #3f3f46' : '1px solid #e8a23d',
+        onTune: () => { this.selectProfile(id); this.go('tuning'); },
+      };
+    };
+    const games = [
+      gd('cs2', 'Counter-Strike 2', 'FPS · competitive', 'CS', '232,162,61', 'tuned'),
+      gd('valorant', 'Valorant', 'FPS · tactical', 'VL', '223,83,64', 'untuned'),
+      gd('apex', 'Apex Legends', 'Battle royale', 'AP', '95,161,223', 'untuned'),
+      gd('fortnite', 'Fortnite', 'BR · building', 'FN', '176,131,230', 'untuned'),
+      gd('lol', 'League of Legends', 'MOBA', 'LO', '63,192,127', 'untuned'),
+      gd('global', 'All games', 'System-wide', '∀', '146,143,139', 'tuned'),
+    ];
+
+    // history
+    const hRow = (date, time, title, detail, tw, status, active) => {
+      const c = status === 'Active' ? CC.good : status === 'Reverted' ? CC.bad : '#928f8b';
+      const bg = status === 'Active' ? 'rgba(63,192,127,.14)' : status === 'Reverted' ? 'rgba(223,83,64,.14)' : '#2c2c32';
+      return {
+        date, time, title, detail, tweaks: tw, status, statusColor: c, statusBg: bg,
+        restoreLabel: active ? 'Restore' : 'Restored',
+        restoreColor: active ? '#c4c2bf' : '#55524f',
+        restoreCursor: active ? 'pointer' : 'default',
+        restoreOpacity: active ? '1' : '.5',
+        onRestore: () => { if (active) this.revert(); },
+      };
+    };
+    const history = (s.history && s.history.length)
+      ? s.history.map(h => hRow(h.when, '', h.text, h.type, 0, h.type === 'revert' ? 'Reverted' : 'Active', h.type !== 'revert'))
+      : [
+      hRow('Today', '18:42', 'Counter-Strike 2 tune', 'Game Mode, GPU scheduling, +7 more', 9, 'Active', true),
+      hRow('Today', '16:10', 'Network latency pass', 'Throttling index, Nagle disabled', 2, 'Superseded', false),
+      hRow('Yesterday', '21:30', 'Valorant tune', 'Power plan, FSO, mouse accel', 6, 'Reverted', false),
+      hRow('Mar 18', '14:05', 'Baseline snapshot', 'Pre-Volante system state', 0, 'Superseded', false),
+      hRow('Mar 15', '09:22', 'All-games system tune', 'Visual effects, background apps', 8, 'Superseded', false),
+    ];
+
+    return {
+      ctxLabel, pipelineLabel: 'pipeline idle',
+      nav, ring, issues,
+      steps: [],
+      monitors, drivers, pings, cp,
+      hasMonitors: monitors.length > 0, hasPings: pings.length > 0, hasCp: cp.length > 0,
+      gridCols: s.variant === 'B' ? 'repeat(2, minmax(0,1fr))' : 'minmax(0,1fr)',
+      showHero: s.variant === 'B', showAllClear: isFocus,
+      allClearText: 'All clear: 3 displays at max refresh · Steam routing healthy · 6 panel values to verify.',
+      heroStats, segBg, segFg, segSh,
+      setVA: () => this.setVariant('A'), setVB: () => this.setVariant('B'), setVC: () => this.setVariant('C'),
+      rerun: () => this.rerun(), rerunLabel: s.scanning ? 'Scanning…' : 'Re-run checks',
+      scanAnim: s.scanning ? 'vspin .8s linear infinite' : 'none',
+      winUpdate: () => this.openUrl('ms-settings:windowsupdate'),
+      controlPanel: () => this.openControlPanel(),
+      advanced: () => this.toast('Advanced mode — manual tweak editor'),
+      benchmark: () => this.benchmark(),
+      startTuning: () => this.go('tuning'),
+      goCheck: () => this.go('check'), goTune: () => this.go('tuning'),
+      goMonitor: () => this.go('monitor'), goHistory: () => this.go('history'),
+      apply: () => this.applyTweaks(), revert: () => this.revert(),
+      profiles, selectedProfileName,
+      tweaks, enabledCount, tweakTotal: s.tweaks.length, activeCats,
+      applyView, applyTotal, applyDone, applyPctStr: applyPct + '%',
+      kpis, changed,
+      sysStats, quickActions, recommended, recentActivity,
+      mon: monView, games, history,
+      screenIsHome: s.screen === 'home', screenIsCheck: s.screen === 'check',
+      screenIsTuning: s.screen === 'tuning', screenIsApplying: s.screen === 'applying',
+      screenIsDone: s.screen === 'done', screenIsMonitor: s.screen === 'monitor',
+      screenIsLibrary: s.screen === 'library', screenIsHistory: s.screen === 'history',
+      hasToast: !!s.toastMsg, toastMsg: s.toastMsg,
+    };
+  }
+}
+</script>
+</body>
+</html>
