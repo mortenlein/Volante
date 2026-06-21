@@ -5,7 +5,9 @@ typical "game optimizer" pack with the dangerous/placebo parts removed and a
 real engine, GUI, and headless/deployment mode added.
 
 Design goals: small, transparent, **truly reversible**, evidence-based, conservative.
-No bundled binaries, no registry cleaners, no blanket service-disabling.
+No registry cleaners, no blanket service-disabling, no sketchy "optimizer" binaries.
+The only bundled binaries are vetted, openly-licensed ones: Microsoft's WebView2 SDK
+(the UI host) and Intel's MIT-licensed PresentMon (FPS capture).
 
 ## How it works
 
@@ -48,17 +50,17 @@ Screens:
 - **Tune** - the tweak catalog as toggles by category; **Apply** (restore point first) and
   **Revert all**, both via the engine.
 - **Monitor** - live hardware telemetry: CPU + per-core, GPU load/temp/clock, VRAM, power,
-  RAM, ping (nvidia-smi + Get-Counter; no bundled binaries). **FPS** needs PresentMon (below).
+  RAM, ping (nvidia-smi + Get-Counter). **FPS** via bundled PresentMon (below).
 - **Games** - per-game profiles (the active profile is persisted).
 - **History** - applied/reverted/benchmark/check events, persisted under `%ProgramData%\Volante`.
 
-### Optional FPS (PresentMon)
+### FPS (PresentMon)
 
-To keep the "no bundled binaries" promise, FPS is **opt-in**: FPS and the **benchmark** show
-"n/a" until you add Microsoft's [PresentMon](https://github.com/GameTechDev/PresentMon)
-(MIT). Drop `PresentMon*.exe` on your `PATH` or into one of: `tools\presentmon\`,
-`lib\presentmon\`, or `%ProgramData%\Volante\presentmon\`. Then **Run benchmark** captures
-real frame timing (avg / 1% low / max) while a game is running.
+FPS works out of the box: a vetted **[PresentMon](https://github.com/GameTechDev/PresentMon)
+1.10** build (Intel/GameTechDev, **MIT**) is bundled in `lib\presentmon` (with its LICENSE).
+**Run benchmark** captures real frame timing (avg / 1% low / max) while a game is running.
+You can point Volante at a different PresentMon via Settings, a copy on `PATH`, or
+`tools\presentmon\` / `%ProgramData%\Volante\presentmon\`.
 
 ## Headless / deployment
 

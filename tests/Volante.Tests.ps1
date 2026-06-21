@@ -122,6 +122,13 @@ Describe 'Settings' {
     }
 }
 
+Describe 'FPS (bundled PresentMon)' {
+    It 'detects the bundled PresentMon' {
+        Get-FpsAvailable | Should Be $true
+        (Get-PresentMonPath) | Should Match 'PresentMon.*\.exe$'
+    }
+}
+
 Describe 'Config export/import' {
     It 'round-trips a custom profile set through a file' {
         InModuleScope Optimizer.Engine {

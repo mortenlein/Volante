@@ -32,6 +32,8 @@ Source: "..\Volante.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\lib\webview2\Microsoft.Web.WebView2.Core.dll";     DestDir: "{app}"; Flags: ignoreversion
 Source: "..\lib\webview2\Microsoft.Web.WebView2.WinForms.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\lib\webview2\WebView2Loader.dll";                  DestDir: "{app}"; Flags: ignoreversion
+; Bundled PresentMon (MIT) for FPS capture.
+Source: "..\lib\presentmon\*"; DestDir: "{app}\lib\presentmon"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "..\Volante.cmd"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\Optimize.ps1"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\README.md";    DestDir: "{app}"; Flags: ignoreversion

@@ -1,18 +1,16 @@
 <#
-    Volante FPS via OPTIONAL PresentMon (no bundled binary, per project ethos).
-    If PresentMon.exe is found (on PATH or a known folder) we capture real frame
-    timing for the benchmark; otherwise FPS is reported as unavailable and the UI
-    shows "n/a" with a hint. Drop PresentMon into one of the searched folders to
-    enable it (see README). Dot-sourced into Optimizer.Engine.psm1.
+    Volante FPS via PresentMon (Intel/GameTechDev, MIT). A vetted PresentMon 1.10
+    build is bundled in lib\presentmon and preferred; a settings path or a copy on
+    PATH overrides it. If none is found, FPS is reported unavailable and the UI shows
+    "n/a". Dot-sourced into Optimizer.Engine.psm1.
 #>
 
 function Get-PresentMonPath {
+    # Explicit override first, then the bundled/known folders, then PATH.
     try { $p = (Get-AppSettings).presentMonPath; if ($p -and (Test-Path -LiteralPath $p)) { return $p } } catch {}
-    $cmd = Get-Command 'PresentMon.exe' -ErrorAction SilentlyContinue
-    if ($cmd) { return $cmd.Source }
     $dirs = @(
-        (Join-Path $PSScriptRoot '..\..\tools\presentmon'),
         (Join-Path $PSScriptRoot '..\..\lib\presentmon'),
+        (Join-Path $PSScriptRoot '..\..\tools\presentmon'),
         (Join-Path $script:DataRoot 'presentmon')
     )
     foreach ($d in $dirs) {
@@ -21,6 +19,8 @@ function Get-PresentMonPath {
             if ($exe) { return $exe.FullName }
         }
     }
+    $cmd = Get-Command 'PresentMon.exe' -ErrorAction SilentlyContinue
+    if ($cmd) { return $cmd.Source }
     return $null
 }
 
@@ -33,13 +33,13 @@ function Invoke-FpsBenchmark {
     $pm = Get-PresentMonPath
     if (-not $pm) {
         return [pscustomobject]@{ available = $false; ok = $false
-            error = 'PresentMon not found - add it to enable FPS (see README).' }
+            error = 'PresentMon not found.' }
     }
     $csv = Join-Path $env:TEMP ("volante_pm_{0}.csv" -f (Get-Date -Format 'yyyyMMddHHmmss'))
     try {
-        # Common PresentMon CLI flags; tolerant of absent ones across versions.
-        $argList = @('--output_file', "`"$csv`"", '--timed', "$Seconds",
-                     '--terminate_after_timed', '--stop_existing_session', '--no_top')
+        # PresentMon 1.x CLI (single-dash); captures all processes by default.
+        $argList = @('-output_file', "`"$csv`"", '-timed', "$Seconds",
+                     '-terminate_after_timed', '-stop_existing_session', '-no_top')
         Start-Process -FilePath $pm -ArgumentList $argList -Wait -WindowStyle Hidden -ErrorAction Stop
         if (-not (Test-Path -LiteralPath $csv)) {
             return [pscustomobject]@{ available = $true; ok = $false
