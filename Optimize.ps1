@@ -18,6 +18,7 @@
 param(
     [switch]   $Headless,
     [switch]   $Report,
+    [switch]   $Dashboard,
     [switch]   $DryRun,
     [switch]   $Recommended,
     [switch]   $All,
@@ -41,7 +42,40 @@ if ($List) {
     return
 }
 
-$noAction = -not ($Headless -or $Report -or $DryRun -or $Recommended -or $All -or
+# --- Dashboard (read-only diagnostics, no admin) ----------------------------
+if ($Dashboard) {
+    Write-Host ''
+    Write-Host '=== Monitor refresh rate ==='
+    foreach ($d in (Get-RefreshRateStatus)) {
+        $tag = if ($d.IsOptimal) { 'OK (at max)' } else { "-> supports up to $($d.MaxHz) Hz" }
+        '{0,-30} {1}x{2}  {3} Hz  {4}' -f $d.Name, $d.Width, $d.Height, $d.CurrentHz, $tag
+    }
+    Write-Host ''
+    Write-Host '=== GPU driver ==='
+    foreach ($g in (Get-GpuDriverStatus)) {
+        $mk  = if ($g.MarketingVersion) { " ($($g.Vendor) $($g.MarketingVersion))" } else { '' }
+        $age = if ($null -ne $g.AgeDays) { "$($g.AgeDays)d old" } else { 'date unknown' }
+        $st  = if ($g.IsStale) { 'STALE - check for a newer one' } else { 'recent' }
+        '{0,-30} {1}{2}  {3}  {4}' -f $g.Name, $g.DriverVersion, $mk, $age, $st
+    }
+    Write-Host ''
+    Write-Host '=== Ping to Valve / Steam (TCP latency) ==='
+    foreach ($p in (Get-ValvePing)) {
+        $ms = if ($null -ne $p.Ms) { "$($p.Ms) ms" } else { 'timeout' }
+        $b  = if ($p.Best) { ' (best)' } else { '' }
+        '{0,-28} {1}{2}' -f $p.Label, $ms, $b
+    }
+    Write-Host ''
+    $cp = Get-GpuControlPanelRecommendations
+    Write-Host "=== CS2 control-panel settings ($($cp.Vendor)) ==="
+    foreach ($it in $cp.Items) {
+        '{0,-36} -> {1,-28} (current: {2})' -f $it.Setting, $it.Recommended, $it.Current
+    }
+    Write-Host ''
+    return
+}
+
+$noAction = -not ($Headless -or $Report -or $Dashboard -or $DryRun -or $Recommended -or $All -or
                   $Apply -or $Revert -or $RevertAll -or $ProfilePath)
 
 # --- GUI mode ----------------------------------------------------------------

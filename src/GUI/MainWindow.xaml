@@ -112,8 +112,80 @@
     <!-- ===================== CONTENT HOST ===================== -->
     <Grid Grid.Row="1">
 
+      <!-- ============ DASHBOARD PAGE (landing) ============ -->
+      <Grid x:Name="PageDashboard">
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+          <StackPanel Width="680" Margin="0,24" HorizontalAlignment="Center">
+            <TextBlock Text="System check" Foreground="#E6E8EE" FontSize="20"
+                       FontWeight="SemiBold" Margin="0,0,0,4"/>
+            <TextBlock Text="A quick look at your setup before we tune anything. Everything here is read-only - the only change is the optional refresh-rate fix, which you confirm."
+                       Foreground="#8A90A2" FontSize="13" TextWrapping="Wrap" Margin="0,0,0,18"/>
+
+            <!-- Card: refresh rate -->
+            <Border Background="#1A1E29" CornerRadius="10" Padding="16" Margin="0,0,0,12">
+              <StackPanel>
+                <TextBlock Text="MONITOR REFRESH RATE" Foreground="#5B86FF" FontSize="12"
+                           FontWeight="Bold" Margin="0,0,0,8"/>
+                <StackPanel x:Name="DashRefreshPanel"/>
+              </StackPanel>
+            </Border>
+
+            <!-- Card: GPU driver -->
+            <Border Background="#1A1E29" CornerRadius="10" Padding="16" Margin="0,0,0,12">
+              <StackPanel>
+                <TextBlock Text="GPU DRIVER" Foreground="#5B86FF" FontSize="12"
+                           FontWeight="Bold" Margin="0,0,0,8"/>
+                <StackPanel x:Name="DashDriverPanel"/>
+                <Button x:Name="BtnWindowsUpdate" Content="Open Windows Update"
+                        Style="{StaticResource Link}" HorizontalAlignment="Left" Margin="0,6,0,0"/>
+              </StackPanel>
+            </Border>
+
+            <!-- Card: Valve ping -->
+            <Border Background="#1A1E29" CornerRadius="10" Padding="16" Margin="0,0,0,12">
+              <StackPanel>
+                <Grid Margin="0,0,0,8">
+                  <TextBlock Text="PING TO VALVE / STEAM" Foreground="#5B86FF" FontSize="12"
+                             FontWeight="Bold" VerticalAlignment="Center"/>
+                  <Button x:Name="BtnPingRetest" Content="Re-test" Style="{StaticResource Link}"
+                          HorizontalAlignment="Right"/>
+                </Grid>
+                <StackPanel x:Name="DashPingPanel"/>
+                <TextBlock Text="TCP handshake latency to Steam edge endpoints - a routing-latency proxy, not your exact in-game ping (CS2 relays don't answer pings)."
+                           Foreground="#6A7080" FontSize="11" TextWrapping="Wrap" Margin="0,8,0,0"/>
+              </StackPanel>
+            </Border>
+
+            <!-- Card: CS2 control-panel settings -->
+            <Border Background="#1A1E29" CornerRadius="10" Padding="16" Margin="0,0,0,12">
+              <StackPanel>
+                <Grid Margin="0,0,0,8">
+                  <TextBlock x:Name="DashCpHeader" Text="CS2 GPU CONTROL-PANEL SETTINGS"
+                             Foreground="#5B86FF" FontSize="12" FontWeight="Bold" VerticalAlignment="Center"/>
+                  <Button x:Name="BtnCpOpen" Content="Open control panel"
+                          HorizontalAlignment="Right"/>
+                </Grid>
+                <StackPanel x:Name="DashCpPanel"/>
+                <TextBlock Text="Recommended CS2 settings. 'Verify in control panel' means the value can't be read safely from outside the driver - open the panel to set it."
+                           Foreground="#6A7080" FontSize="11" TextWrapping="Wrap" Margin="0,8,0,0"/>
+              </StackPanel>
+            </Border>
+
+            <!-- Footer actions -->
+            <Grid Margin="0,8,0,0">
+              <Button x:Name="BtnDashRecheck" Content="Re-run checks" Style="{StaticResource Link}"
+                      HorizontalAlignment="Left"/>
+              <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button x:Name="BtnDashAdvanced" Content="Advanced mode" Style="{StaticResource Link}"/>
+                <Button x:Name="BtnDashStart" Content="Start tuning" Style="{StaticResource Accent}"/>
+              </StackPanel>
+            </Grid>
+          </StackPanel>
+        </ScrollViewer>
+      </Grid>
+
       <!-- ============ WIZARD PAGE ============ -->
-      <Grid x:Name="PageWizard">
+      <Grid x:Name="PageWizard" Visibility="Collapsed">
         <ScrollViewer VerticalScrollBarVisibility="Auto">
           <Grid>
             <!-- Step 1: Goals -->
@@ -227,7 +299,7 @@
 
         <!-- Toolbar -->
         <DockPanel Grid.Row="0" Margin="18,14,18,4" LastChildFill="False">
-          <Button x:Name="BtnToSimple" Content="&#x2190; Simple mode" Style="{StaticResource Link}"
+          <Button x:Name="BtnToSimple" Content="&#x2190; Dashboard" Style="{StaticResource Link}"
                   DockPanel.Dock="Left"/>
           <Button x:Name="BtnApply" Content="Apply Selected" Style="{StaticResource Accent}"
                   DockPanel.Dock="Right"/>

@@ -238,7 +238,13 @@ function Import-OptimizerProfile {
 # the tweak script blocks resolve Set-TrackedValue etc. without exporting them).
 . (Join-Path $PSScriptRoot 'Tweaks.ps1')
 
+# Load the dashboard diagnostics (read-only system checks shown before tuning).
+. (Join-Path $PSScriptRoot 'Dashboard.ps1')
+
 Export-ModuleMember -Function `
     Write-Log, Set-LogSink, Test-IsAdmin, New-OptimizerRestorePoint, `
     Get-TweakCatalog, Invoke-TweakTest, Invoke-TweakApply, Invoke-TweakRevert, `
-    Get-RecommendedIds, Import-OptimizerProfile, Get-BackupRecords
+    Get-RecommendedIds, Import-OptimizerProfile, Get-BackupRecords, `
+    Get-RefreshRateStatus, Set-MaxRefreshRate, Restore-RefreshRate, `
+    Get-GpuDriverStatus, Get-ValvePing, Get-ValvePingTargets, `
+    Get-GpuControlPanelRecommendations, Open-GpuControlPanel
