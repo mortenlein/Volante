@@ -19,7 +19,7 @@ DisableProgramGroupPage=yes
 UninstallDisplayIcon={app}\{#AppExe}
 OutputDir=..\dist
 OutputBaseFilename=Volante-Setup-{#AppVersion}
-SetupIconFile=..\assets\gametune.ico
+SetupIconFile=..\assets\volante.ico
 Compression=lzma2
 SolidCompression=yes
 WizardStyle=modern
@@ -28,6 +28,10 @@ PrivilegesRequired=admin
 
 [Files]
 Source: "..\Volante.exe"; DestDir: "{app}"; Flags: ignoreversion
+; WebView2 SDK DLLs must sit next to the exe (managed assemblies + native loader).
+Source: "..\lib\webview2\Microsoft.Web.WebView2.Core.dll";     DestDir: "{app}"; Flags: ignoreversion
+Source: "..\lib\webview2\Microsoft.Web.WebView2.WinForms.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\lib\webview2\WebView2Loader.dll";                  DestDir: "{app}"; Flags: ignoreversion
 Source: "..\Volante.cmd"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\Optimize.ps1"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\README.md";    DestDir: "{app}"; Flags: ignoreversion

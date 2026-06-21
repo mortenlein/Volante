@@ -60,9 +60,6 @@ To keep the "no bundled binaries" promise, FPS is **opt-in**: FPS and the **benc
 `lib\presentmon\`, or `%ProgramData%\Volante\presentmon\`. Then **Run benchmark** captures
 real frame timing (avg / 1% low / max) while a game is running.
 
-> The previous WPF GUI (`src\GUI`) is **deprecated**, kept only as a fallback during the
-> WebView2 migration.
-
 ## Headless / deployment
 
 ```powershell

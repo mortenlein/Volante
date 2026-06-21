@@ -79,9 +79,8 @@ $noAction = -not ($Headless -or $Report -or $Dashboard -or $DryRun -or $Recommen
                   $Apply -or $Revert -or $RevertAll -or $ProfilePath)
 
 # --- App (GUI) mode ----------------------------------------------------------
-# The UI is now the WebView2 desktop app (Volante.exe): it self-elevates (admin
-# manifest) and renders src\WebUI through the in-process engine bridge. The old
-# WPF GUI (src\GUI) is deprecated/kept as a fallback.
+# The UI is the WebView2 desktop app (Volante.exe): it self-elevates (admin
+# manifest) and renders src\WebUI through the in-process engine bridge.
 if ($noAction) {
     $exe = Join-Path $PSScriptRoot 'Volante.exe'
     if (Test-Path $exe) { Start-Process -FilePath $exe; return }
