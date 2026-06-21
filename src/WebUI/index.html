@@ -313,6 +313,21 @@
             </section>
             </sc-if>
 
+            <section style="background:#1d1d22; border:1px solid #303036; border-radius:11px; box-shadow:0 1px 2px rgba(0,0,0,.4);">
+              <div style="display:flex; align-items:center; justify-content:space-between; padding:13px 16px; border-bottom:1px solid #303036;">
+                <span style="font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:#928f8b; font-weight:600;">CS2 setup</span>
+                <button onClick="{{writeCs2}}" style="height:28px; padding:0 11px; background:#242429; color:#c4c2bf; border:1px solid #3f3f46; border-radius:4px; font-size:11px; letter-spacing:.02em; cursor:pointer; font-family:inherit;" style-hover="background:#2c2c32;border-color:#54545c">{{cs2.autoexecBtn}}</button>
+              </div>
+              <div style="padding:12px 16px 14px; display:flex; flex-direction:column; gap:10px;">
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:14px;">
+                  <span style="font-size:11.5px; color:#928f8b; flex:none;">Launch options</span>
+                  <code style="font-size:11.5px; color:#c4c2bf; background:#16161a; border:1px solid #303036; border-radius:5px; padding:5px 9px; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{cs2.launchOptions}}</code>
+                  <button onClick="{{copyCs2}}" style="height:28px; padding:0 11px; background:#242429; color:#c4c2bf; border:1px solid #3f3f46; border-radius:4px; font-size:11px; cursor:pointer; font-family:inherit; flex:none;" style-hover="background:#2c2c32;border-color:#54545c">Copy</button>
+                </div>
+                <div style="font-size:10.5px; color:#55524f; line-height:1.5;">{{cs2.status}}</div>
+              </div>
+            </section>
+
           </div>
         </div>
 
@@ -630,6 +645,7 @@ class Component extends DCLogic {
       live: null,
       history: null,
       benchFps: null,
+      cs2: null,
       pings: [
         { name: 'Steam (valvesoftware.com)', ms: 53 },
         { name: 'Steam store', ms: 36 },
@@ -741,6 +757,19 @@ class Component extends DCLogic {
       return v.call('getTweaks', { profile: active });
     }).then(t => { if (this.arr(t).length) this.setState({ tweaks: this.arr(t) }); }).catch(() => {});
     v.call('getHistory').then(h => this.setState({ history: this.arr(h) })).catch(() => {});
+    v.call('getCs2').then(c => this.setState({ cs2: c })).catch(() => {});
+  }
+  writeCs2() {
+    const v = window.volante;
+    if (!(v && v.available)) { this.toast('CS2 autoexec is host-only'); return; }
+    v.call('writeCs2Autoexec').then(r => {
+      if (r && r.ok) { this.loadLive(); this.toast('Wrote autoexec.cfg' + (r.backedUp ? ' (backed up existing)' : '') + ' - add "+exec autoexec" to launch options'); }
+      else { this.toast((r && r.error) ? r.error : 'CS2 not found'); }
+    }).catch(err => this.toast('Write failed: ' + err.message));
+  }
+  copyText(t) {
+    if (!t) return;
+    try { navigator.clipboard.writeText(t); this.toast('Copied to clipboard'); } catch (e) { this.toast(t); }
   }
   openUrl(u) {
     const v = window.volante;
@@ -1072,6 +1101,15 @@ class Component extends DCLogic {
       winUpdate: () => this.openUrl('ms-settings:windowsupdate'),
       controlPanel: () => this.openControlPanel(),
       winMin: () => this.winCmd('minimize'), winMax: () => this.winCmd('maximize'), winClose: () => this.winCmd('close'),
+      cs2: {
+        installed: !!(s.cs2 && s.cs2.installed),
+        launchOptions: (s.cs2 && s.cs2.launchOptions) || '-novid -high -nojoy +fps_max 0 +exec autoexec',
+        status: (s.cs2 && s.cs2.installed)
+          ? ('autoexec.cfg ' + (s.cs2.autoexec ? 'present' : 'not written yet') + ' · ' + (s.cs2.path || ''))
+          : 'CS2 not detected via Steam',
+        autoexecBtn: (s.cs2 && s.cs2.autoexec) ? 'Rewrite autoexec.cfg' : 'Write autoexec.cfg',
+      },
+      writeCs2: () => this.writeCs2(), copyCs2: () => this.copyText((this.state.cs2 && this.state.cs2.launchOptions) || ''),
       advanced: () => this.toast('Advanced mode — manual tweak editor'),
       benchmark: () => this.benchmark(),
       startTuning: () => this.go('tuning'),

@@ -145,6 +145,8 @@ function Invoke-VolanteCommand {
             'setProfile'       { Set-ActiveProfile -Id $a.id }
             'getHistory'       { Get-AppHistory -Take 12 }
             'fpsAvailable'     { [pscustomobject]@{ available = (Get-FpsAvailable) } }
+            'getCs2'           { Get-Cs2Info }
+            'writeCs2Autoexec' { $r = Set-Cs2Autoexec; if ($r.ok) { Add-AppHistory -Type 'apply' -Text 'Wrote CS2 autoexec.cfg' }; $r }
             'runBenchmark'     {
                 $b = Invoke-FpsBenchmark -Seconds $(if ($a.seconds) { [int]$a.seconds } else { 20 })
                 if ($b.ok) { Add-AppHistory -Type 'benchmark' -Text "Benchmark: $($b.avg) avg / $($b.low1) 1% low fps" }

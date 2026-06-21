@@ -244,9 +244,10 @@ function Import-OptimizerProfile {
 # Load live telemetry (monitor screen).
 . (Join-Path $PSScriptRoot 'Telemetry.ps1')
 
-# Load app state (readiness, profiles, history) and optional FPS (PresentMon).
+# Load app state (readiness, profiles, history), optional FPS (PresentMon), CS2 helpers.
 . (Join-Path $PSScriptRoot 'AppStore.ps1')
 . (Join-Path $PSScriptRoot 'Fps.ps1')
+. (Join-Path $PSScriptRoot 'Cs2.ps1')
 
 # Load the app API (command dispatcher for the WebView2 UI bridge).
 . (Join-Path $PSScriptRoot 'AppApi.ps1')
@@ -261,4 +262,5 @@ Export-ModuleMember -Function `
     Get-MonitorTelemetry, `
     Get-AppProfiles, Set-ActiveProfile, Get-AppHistory, Add-AppHistory, `
     Get-PresentMonPath, Get-FpsAvailable, Invoke-FpsBenchmark, `
+    Get-Cs2Info, Set-Cs2Autoexec, `
     Get-DashboardData, Get-TweakCards, Invoke-VolanteCommand
