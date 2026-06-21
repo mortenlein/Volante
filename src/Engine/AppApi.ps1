@@ -72,10 +72,14 @@ function Get-DashboardData {
 }
 
 # Project the tweak catalog into the design's tweak-card shape. `id` is the real
-# catalog id, so applyTweaks just passes ids straight back to the engine.
+# catalog id, so applyTweaks just passes ids straight back to the engine. When a
+# profile is given, its tweak set drives which cards start enabled.
 function Get-TweakCards {
+    param([string]$Profile)
+    $set = if ($Profile) { @(Get-ProfileTweakIds -Id $Profile) } else { $null }
     @(Get-TweakCatalog | ForEach-Object {
         $s = Invoke-TweakTest $_
+        $inSet = if ($null -ne $set) { $set -contains $_.Id } else { [bool]$_.Recommended }
         [pscustomobject]@{
             id      = $_.Id
             name    = $_.Name
@@ -84,28 +88,32 @@ function Get-TweakCards {
             risk    = $_.Risk
             applied = [bool]$s.Applied
             value   = $(if ($s.Applied) { 'Applied' } else { 'Off' })
-            enabled = [bool]($_.Recommended -and -not $s.Applied)
+            enabled = [bool]($inSet -and -not $s.Applied)
         }
     })
 }
 
 function Invoke-ApplyTweakIds {
-    param([string[]]$Ids)
+    param([string[]]$Ids, [string]$Profile, [switch]$DryRun)
     $cat = Get-TweakCatalog
-    $applied = 0; $failed = 0; $skipped = 0; $reboot = $false
-    if ($Ids -and @($Ids).Count -gt 0 -and (Test-IsAdmin)) { New-OptimizerRestorePoint | Out-Null }
+    $applied = 0; $failed = 0; $skipped = 0; $reboot = $false; $would = 0
+    if (-not $DryRun -and @($Ids).Count -gt 0 -and (Test-IsAdmin)) { New-OptimizerRestorePoint | Out-Null }
     foreach ($id in @($Ids)) {
         $t = $cat | Where-Object Id -eq $id | Select-Object -First 1
         if (-not $t) { continue }
-        $r = Invoke-TweakApply $t
+        $r = Invoke-TweakApply $t -DryRun:$DryRun
         switch ($r.Result) {
-            'Applied' { $applied++; if ($t.RebootRequired) { $reboot = $true } }
-            'Failed'  { $failed++ }
-            'Skipped' { $skipped++ }
+            'Applied'    { $applied++; if ($t.RebootRequired) { $reboot = $true } }
+            'WouldApply' { $would++;   if ($t.RebootRequired) { $reboot = $true } }
+            'Failed'     { $failed++ }
+            'Skipped'    { $skipped++ }
         }
     }
-    if ($applied -gt 0) { Add-AppHistory -Type 'apply' -Text "Applied $applied tweak(s)" }
-    [pscustomobject]@{ applied = $applied; failed = $failed; skipped = $skipped; reboot = $reboot }
+    if (-not $DryRun -and $applied -gt 0) {
+        $label = if ($Profile) { " - $Profile" } else { '' }
+        Add-AppHistory -Type 'apply' -Text "Applied $applied tweak(s)$label"
+    }
+    [pscustomobject]@{ applied = $applied; would = $would; failed = $failed; skipped = $skipped; reboot = $reboot; dryRun = [bool]$DryRun }
 }
 
 function Invoke-RevertAllTweaks {
@@ -127,10 +135,11 @@ function Invoke-VolanteCommand {
         $a   = $req.args
         $data = switch ($req.command) {
             'getDashboard'     { Get-DashboardData }
-            'getTweaks'        { Get-TweakCards }
+            'getTweaks'        { Get-TweakCards -Profile $a.profile }
             'getMonitor'       { Get-MonitorTelemetry }
             'rerunChecks'      { Add-AppHistory -Type 'check' -Text 'Ran system check'; Get-DashboardData }
-            'applyTweaks'      { Invoke-ApplyTweakIds @($a.ids) }
+            'applyTweaks'      { Invoke-ApplyTweakIds -Ids @($a.ids) -Profile $a.profile }
+            'previewTweaks'    { Invoke-ApplyTweakIds -Ids @($a.ids) -DryRun }
             'revertAll'        { Invoke-RevertAllTweaks }
             'getProfiles'      { Get-AppProfiles }
             'setProfile'       { Set-ActiveProfile -Id $a.id }

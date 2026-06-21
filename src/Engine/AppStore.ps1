@@ -44,6 +44,25 @@ function Get-DefaultProfiles {
     )
 }
 
+# Which catalog tweaks a profile selects. Competitive shooters share a latency-
+# focused set; 'global' uses the full recommended preset.
+function Get-ProfileTweakIds {
+    param([string]$Id)
+    $competitive = @(
+        'mouse-accel-off', 'gamedvr-off', 'game-mode-on', 'startup-delay-off', 'menu-show-delay',
+        'system-responsiveness', 'games-task-priority', 'network-throttling-off',
+        'power-ultimate', 'power-throttling-off', 'usb-selective-suspend-off', 'pcie-aspm-off'
+    )
+    switch ($Id) {
+        'cs2'      { $competitive }
+        'valorant' { $competitive }
+        'apex'     { $competitive }
+        'fortnite' { $competitive }
+        'lol'      { @('mouse-accel-off', 'game-mode-on', 'startup-delay-off', 'menu-show-delay', 'power-ultimate') }
+        default    { @((Get-TweakCatalog | Where-Object Recommended).Id) }
+    }
+}
+
 function Get-AppProfiles {
     Initialize-Store
     $active = 'cs2'

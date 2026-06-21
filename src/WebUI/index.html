@@ -366,6 +366,7 @@
           <span style="font-size:11.5px; color:#6d6a66;">Restore point created automatically before applying.</span>
           <div style="display:flex; gap:9px;">
             <button onClick="{{goCheck}}" style="height:36px; padding:0 16px; background:#242429; color:#c4c2bf; border:1px solid #3f3f46; border-radius:7px; font-size:12.5px; cursor:pointer; font-family:inherit;" style-hover="background:#2c2c32;border-color:#54545c">Back</button>
+            <button onClick="{{preview}}" style="height:36px; padding:0 16px; background:#242429; color:#c4c2bf; border:1px solid #3f3f46; border-radius:7px; font-size:12.5px; cursor:pointer; font-family:inherit;" style-hover="background:#2c2c32;border-color:#54545c">Preview</button>
             <button onClick="{{apply}}" style="height:36px; padding:0 20px; background:#e8a23d; color:#2a1f0a; border:none; border-radius:7px; font-size:13px; font-weight:600; cursor:pointer; font-family:inherit;" style-hover="filter:brightness(1.08)">Apply {{enabledCount}} tweaks</button>
           </div>
         </div>
@@ -706,7 +707,19 @@ class Component extends DCLogic {
   selectProfile(id) {
     this.setState({ profile: id });
     const v = window.volante;
-    if (v && v.available) v.call('setProfile', { id: id }).catch(() => {});
+    if (v && v.available) {
+      v.call('setProfile', { id: id }).catch(() => {});
+      v.call('getTweaks', { profile: id }).then(t => { if (this.arr(t).length) this.setState({ tweaks: this.arr(t) }); }).catch(() => {});
+    }
+  }
+  preview() {
+    const v = window.volante;
+    const ids = this.state.tweaks.filter(t => t.enabled).map(t => t.id);
+    if (!ids.length) { this.toast('Select at least one tweak'); return; }
+    if (!(v && v.available)) { this.toast(ids.length + ' tweak(s) would be applied'); return; }
+    v.call('previewTweaks', { ids: ids }).then(r => {
+      this.toast('Preview: ' + (r.would || 0) + ' would apply' + (r.skipped ? ', ' + r.skipped + ' need admin' : '') + ' - nothing changed');
+    }).catch(err => this.toast('Preview failed: ' + err.message));
   }
   benchmark() {
     const v = window.volante;
@@ -722,8 +735,11 @@ class Component extends DCLogic {
     const v = window.volante;
     if (!v || !v.available) return;
     v.call('getDashboard').then(d => this.setState({ live: d, pings: this.arr(d && d.pings).length ? this.arr(d.pings) : this.state.pings })).catch(() => {});
-    v.call('getTweaks').then(t => { if (this.arr(t).length) this.setState({ tweaks: this.arr(t) }); }).catch(() => {});
-    v.call('getProfiles').then(p => { if (p && p.active) this.setState({ profile: p.active }); }).catch(() => {});
+    v.call('getProfiles').then(p => {
+      const active = (p && p.active) || this.state.profile;
+      this.setState({ profile: active });
+      return v.call('getTweaks', { profile: active });
+    }).then(t => { if (this.arr(t).length) this.setState({ tweaks: this.arr(t) }); }).catch(() => {});
     v.call('getHistory').then(h => this.setState({ history: this.arr(h) })).catch(() => {});
   }
   openUrl(u) {
@@ -767,7 +783,7 @@ class Component extends DCLogic {
     this.setState({ screen: 'applying', applyIndex: 0 });
     const v = window.volante;
     if (v && v.available) {
-      v.call('applyTweaks', { ids: this.state.tweaks.filter(t => t.enabled).map(t => t.id) })
+      v.call('applyTweaks', { ids: this.state.tweaks.filter(t => t.enabled).map(t => t.id), profile: this.state.profile })
         .then(r => { this.loadLive(); this.toast('Applied ' + (r.applied || 0) + ' tweak(s)' + (r.skipped ? ', ' + r.skipped + ' need admin' : '')); })
         .catch(err => this.toast('Apply failed: ' + err.message));
     }
@@ -1061,7 +1077,7 @@ class Component extends DCLogic {
       startTuning: () => this.go('tuning'),
       goCheck: () => this.go('check'), goTune: () => this.go('tuning'),
       goMonitor: () => this.go('monitor'), goHistory: () => this.go('history'),
-      apply: () => this.applyTweaks(), revert: () => this.revert(),
+      apply: () => this.applyTweaks(), preview: () => this.preview(), revert: () => this.revert(),
       profiles, selectedProfileName,
       tweaks, enabledCount, tweakTotal: s.tweaks.length, activeCats,
       applyView, applyTotal, applyDone, applyPctStr: applyPct + '%',
