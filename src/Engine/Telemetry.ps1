@@ -68,13 +68,40 @@ function Get-CpuTemperature {
     return $null
 }
 
+# --- Persisted telemetry history (throttled ring buffer) ---------------------
+$script:TelemetryFile      = Join-Path $script:DataRoot 'telemetry.json'
+$script:LastTelemetryWrite = [datetime]::MinValue
+
+function Add-TelemetrySample {
+    param($Cpu, $Gpu, $GpuTemp, [switch]$Force)
+    $now = Get-Date
+    if (-not $Force -and ($now - $script:LastTelemetryWrite).TotalSeconds -lt 5) { return }
+    $script:LastTelemetryWrite = $now
+    Initialize-Store
+    $sample = [pscustomobject]@{ t = $now.ToString('o'); cpu = [int]$Cpu; gpu = [int]$Gpu; gpuTemp = [int]$GpuTemp }
+    $existing = @()
+    if (Test-Path -LiteralPath $script:TelemetryFile) {
+        try { $existing = @(Get-Content -LiteralPath $script:TelemetryFile -Raw | ConvertFrom-Json) } catch {}
+    }
+    $all = @(@($existing) + $sample | Select-Object -Last 240)   # ~20 min at 5s
+    ,$all | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath $script:TelemetryFile -Encoding UTF8
+}
+
+function Get-TelemetryHistory {
+    param([int]$Take = 60)
+    Initialize-Store
+    if (-not (Test-Path -LiteralPath $script:TelemetryFile)) { return @() }
+    try { @(Get-Content -LiteralPath $script:TelemetryFile -Raw | ConvertFrom-Json | Select-Object -Last $Take) }
+    catch { @() }
+}
+
 # One snapshot in the design's mon{} shape (minus fps/frameMs/hist, which the UI
-# keeps until PresentMon lands in a later phase).
+# keeps until PresentMon lands in a later phase). Also records a throttled sample.
 function Get-MonitorTelemetry {
     $nv = Get-NvidiaSmiSnapshot
     $c  = Get-CpuCounters
     $os = $null; try { $os = Get-CimInstance Win32_OperatingSystem -ErrorAction Stop } catch {}
-    [pscustomobject]@{
+    $obj = [pscustomobject]@{
         cpu       = $c.cpu
         cores     = $c.cores
         cpuTemp   = Get-CpuTemperature
@@ -88,4 +115,6 @@ function Get-MonitorTelemetry {
         ramTotal  = $(if ($os) { [math]::Round($os.TotalVisibleMemorySize / 1048576, 0) } else { 0 })
         ping      = (Test-TcpLatency -HostName 'api.steampowered.com' -Port 443 -TimeoutMs 600)
     }
+    try { Add-TelemetrySample -Cpu $obj.cpu -Gpu $obj.gpu -GpuTemp $obj.gpuTemp } catch {}
+    $obj
 }

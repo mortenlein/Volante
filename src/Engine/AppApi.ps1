@@ -137,6 +137,7 @@ function Invoke-VolanteCommand {
             'getDashboard'     { Get-DashboardData }
             'getTweaks'        { Get-TweakCards -Profile $a.profile }
             'getMonitor'       { Get-MonitorTelemetry }
+            'getTelemetryHistory' { Get-TelemetryHistory -Take $(if ($a.take) { [int]$a.take } else { 60 }) }
             'rerunChecks'      { Add-AppHistory -Type 'check' -Text 'Ran system check'; Get-DashboardData }
             'applyTweaks'      { Invoke-ApplyTweakIds -Ids @($a.ids) -Profile $a.profile }
             'previewTweaks'    { Invoke-ApplyTweakIds -Ids @($a.ids) -DryRun }

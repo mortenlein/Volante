@@ -105,6 +105,18 @@ Describe 'Profiles persistence' {
     }
 }
 
+Describe 'Telemetry history persistence' {
+    It 'records and reads back samples' {
+        InModuleScope Optimizer.Engine {
+            Add-TelemetrySample -Cpu 42 -Gpu 71 -GpuTemp 64 -Force
+            $h = Get-TelemetryHistory -Take 10
+            @($h).Count | Should BeGreaterThan 0
+            $last = @($h)[-1]
+            ($last.cpu -ge 0) | Should Be $true
+        }
+    }
+}
+
 Describe 'History persistence' {
     It 'records and reads back an entry' {
         $marker = "test-$([guid]::NewGuid())"

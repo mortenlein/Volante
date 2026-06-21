@@ -494,10 +494,11 @@
                   <line x1="0" y1="46" x2="460" y2="46" stroke="#2c2c32" stroke-width="1"></line>
                   <line x1="0" y1="69" x2="460" y2="69" stroke="#2c2c32" stroke-width="1"></line>
                   <polyline points="{{mon.areaPath}}" fill="rgba(63,192,127,.1)" stroke="none"></polyline>
+                  <polyline points="{{mon.cpuLinePath}}" fill="none" stroke="#5fa1df" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" opacity="0.85"></polyline>
                   <polyline points="{{mon.linePath}}" fill="none" stroke="#3fc07f" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"></polyline>
                 </svg>
               </div>
-              <div style="display:flex; justify-content:space-between; font-size:10.5px; color:#55524f; margin-top:4px;"><span>avg {{mon.fpsAvg}}%</span><span>min {{mon.fpsLow}}%</span><span>max {{mon.fpsMax}}%</span></div>
+              <div style="display:flex; justify-content:space-between; font-size:10.5px; color:#55524f; margin-top:4px;"><span style="color:#3fc07f;">GPU avg {{mon.gpuAvg}}%</span><span style="color:#5fa1df;">CPU avg {{mon.cpuAvg}}%</span></div>
             </div>
 
             <div style="background:#1d1d22; border:1px solid #303036; border-radius:11px; padding:18px 20px; display:flex; flex-direction:column;">
@@ -672,7 +673,8 @@ class Component extends DCLogic {
       mon: {
         fps: 312, frameMs: 3.2, cpu: 41, cpuTemp: 58, gpu: 71, gpuTemp: 64, gpuClock: 2610, vram: 8.4, ping: 27, power: 264,
         cores: [44, 38, 52, 31, 47, 29, 61, 35],
-        hist: Array.from({ length: 48 }, (_, i) => 45 + Math.round(Math.sin(i / 3) * 10 + (Math.random() - 0.5) * 8)), // GPU-load baseline
+        hist: Array.from({ length: 48 }, (_, i) => 45 + Math.round(Math.sin(i / 3) * 10 + (Math.random() - 0.5) * 8)),    // GPU-load baseline
+        cpuHist: Array.from({ length: 48 }, (_, i) => 28 + Math.round(Math.sin(i / 4) * 8 + (Math.random() - 0.5) * 6)),  // CPU-load baseline
       },
     };
   })();
@@ -695,8 +697,9 @@ class Component extends DCLogic {
       this.setState(s => {
         const m = s.mon;
         const cores = (t.cores && t.cores.length) ? t.cores : m.cores;
-        const hist = m.hist.slice(1).concat(typeof t.gpu === 'number' ? t.gpu : 0); // chart = real GPU load
-        return { mon: { ...m, ...t, cores, hist } };
+        const hist = m.hist.slice(1).concat(typeof t.gpu === 'number' ? t.gpu : 0);          // real GPU load
+        const cpuHist = (m.cpuHist || []).slice(-47).concat(typeof t.cpu === 'number' ? t.cpu : 0); // real CPU load
+        return { mon: { ...m, ...t, cores, hist, cpuHist } };
       });
     }).catch(() => { this._monBusy = false; });
   }
@@ -707,15 +710,17 @@ class Component extends DCLogic {
       const m = s.mon;
       const fps = Math.round(j(m.fps, 250, 360, 26));
       const gpu = Math.round(j(m.gpu, 58, 96, 12));
-      const hist = m.hist.slice(1).concat(gpu); // chart mirrors the app: GPU load
+      const cpuv = Math.round(j(m.cpu, 28, 72, 14));
+      const hist = m.hist.slice(1).concat(gpu);          // chart mirrors the app: GPU load
+      const cpuHist = (m.cpuHist || []).slice(-47).concat(cpuv);
       return {
         mon: {
           ...m, fps, frameMs: +(1000 / fps).toFixed(1),
-          cpu: Math.round(j(m.cpu, 28, 72, 14)), cpuTemp: Math.round(j(m.cpuTemp, 52, 72, 4)),
+          cpu: cpuv, cpuTemp: Math.round(j(m.cpuTemp, 52, 72, 4)),
           gpu, gpuTemp: Math.round(j(m.gpuTemp, 58, 76, 4)),
           gpuClock: Math.round(j(m.gpuClock, 2520, 2730, 60)), vram: +j(m.vram, 7.2, 10.4, .6).toFixed(1),
           ping: Math.round(j(m.ping, 22, 38, 5)), power: Math.round(j(m.power, 230, 310, 24)),
-          cores: m.cores.map(c => Math.round(j(c, 18, 96, 30))), hist,
+          cores: m.cores.map(c => Math.round(j(c, 18, 96, 30))), hist, cpuHist,
         },
       };
     });
@@ -777,6 +782,10 @@ class Component extends DCLogic {
     }).then(t => { if (this.arr(t).length) this.setState({ tweaks: this.arr(t) }); }).catch(() => {});
     v.call('getHistory').then(h => this.setState({ history: this.arr(h) })).catch(() => {});
     v.call('getCs2').then(c => this.setState({ cs2: c })).catch(() => {});
+    v.call('getTelemetryHistory', { take: 48 }).then(h => {
+      const a = this.arr(h);
+      if (a.length) this.setState(s => ({ mon: { ...s.mon, hist: a.map(x => x.gpu), cpuHist: a.map(x => x.cpu) } }));
+    }).catch(() => {});
   }
   writeCs2() {
     const v = window.volante;
@@ -1019,28 +1028,25 @@ class Component extends DCLogic {
       { text: 'System check — 78/100', when: 'yesterday', color: CC.good },
     ];
 
-    // monitor derived — big chart shows live GPU load (real); FPS comes from the benchmark.
+    // monitor derived — big chart overlays live GPU + CPU load (real, fixed 0-100 scale).
     const m = s.mon;
     const W = 460, H = 92;
-    const hvals = m.hist.length ? m.hist : [0];
-    let lo = Math.min.apply(null, hvals), hi = Math.max.apply(null, hvals);
-    if (hi - lo < 1) { lo = Math.max(0, lo - 1); hi = lo + 2; }
-    const pts = m.hist.map((v, i) => {
-      const x = (i / Math.max(1, m.hist.length - 1)) * W;
-      const y = H - ((v - lo) / (hi - lo)) * H;
+    const cpuHist = m.cpuHist || [];
+    const toPts = arr => (arr.length ? arr : [0]).map((v, i, a) => {
+      const x = (i / Math.max(1, a.length - 1)) * W;
+      const y = H - (Math.max(0, Math.min(100, v)) / 100) * H;
       return x.toFixed(1) + ',' + Math.max(2, Math.min(H - 2, y)).toFixed(1);
-    });
-    const linePath = pts.join(' ');
+    }).join(' ');
+    const linePath = toPts(m.hist);
     const areaPath = '0,' + H + ' ' + linePath + ' ' + W + ',' + H;
-    const sorted = [...m.hist].sort((a, b) => a - b);
-    const fpsAvg = Math.round(m.hist.reduce((a, b) => a + b, 0) / Math.max(1, m.hist.length));
-    const fpsLow = Math.round(sorted[0] || 0);
-    const fpsMax = Math.round(sorted[sorted.length - 1] || 0);
+    const cpuLinePath = toPts(cpuHist);
+    const avg = arr => Math.round((arr.length ? arr : [0]).reduce((a, b) => a + b, 0) / Math.max(1, arr.length));
+    const gpuAvg = avg(m.hist), cpuAvg = avg(cpuHist);
     const ramUsed = (m.ramUsed != null) ? m.ramUsed : 14.2;
     const ramTotal = (m.ramTotal != null && m.ramTotal > 0) ? m.ramTotal : 32;
     const monView = {
-      perfTitle: 'GPU load', perfBig: m.gpu, perfSub: '% · ' + m.gpuClock + ' MHz',
-      fpsAvg, fpsLow, fpsMax, linePath, areaPath,
+      perfTitle: 'GPU / CPU load', perfBig: m.gpu, perfSub: '% gpu · ' + m.cpu + '% cpu',
+      linePath, areaPath, cpuLinePath, gpuAvg, cpuAvg,
       cpu: m.cpu, cpuTemp: (m.cpuTemp == null ? '--' : m.cpuTemp), cpuTempColor: (m.cpuTemp != null && m.cpuTemp >= 70) ? CC.warn : CC.good,
       gpu: m.gpu, gpuTemp: m.gpuTemp, gpuTempColor: m.gpuTemp >= 74 ? CC.warn : CC.good,
       gpuClock: m.gpuClock, gpuClockPct: Math.max(0, Math.min(100, Math.round((m.gpuClock - 2400) / (2750 - 2400) * 100))) + '%',

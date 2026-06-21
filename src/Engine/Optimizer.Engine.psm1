@@ -259,7 +259,7 @@ Export-ModuleMember -Function `
     Get-RefreshRateStatus, Set-MaxRefreshRate, Restore-RefreshRate, `
     Get-GpuDriverStatus, Get-ValvePing, Get-ValvePingTargets, `
     Get-GpuControlPanelRecommendations, Open-GpuControlPanel, `
-    Get-MonitorTelemetry, `
+    Get-MonitorTelemetry, Get-TelemetryHistory, Add-TelemetrySample, `
     Get-AppProfiles, Set-ActiveProfile, Save-ProfileTweaks, Reset-ProfileTweaks, `
     Get-AppHistory, Add-AppHistory, `
     Get-PresentMonPath, Get-FpsAvailable, Invoke-FpsBenchmark, `
