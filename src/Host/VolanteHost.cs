@@ -8,6 +8,7 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Runtime.InteropServices;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
 using Microsoft.Web.WebView2.Core;
@@ -45,6 +46,8 @@ class VolanteForm : Form
         Height = 900;
         StartPosition = FormStartPosition.CenterScreen;
         BackColor = System.Drawing.Color.FromArgb(15, 15, 17);
+        FormBorderStyle = FormBorderStyle.None;          // the web UI draws its own title bar
+        MinimumSize = new System.Drawing.Size(900, 600);
         _web = new WebView2 { Dock = DockStyle.Fill };
         Controls.Add(_web);
         Load += async (s, e) => await InitAsync();
@@ -116,6 +119,10 @@ class VolanteForm : Form
         catch { return; }
         if (string.IsNullOrEmpty(raw)) return;
 
+        // Window-chrome messages are handled by the host (we're on the UI thread here),
+        // not the engine.
+        if (raw.IndexOf("__win", StringComparison.Ordinal) >= 0) { HandleWin(raw); return; }
+
         Task.Run(() =>
         {
             string result = Dispatch(raw);
@@ -171,6 +178,40 @@ class VolanteForm : Form
             }
         }
         return sb.Append('"').ToString();
+    }
+
+    // --- Frameless window chrome (the custom title bar lives in the web UI) -----
+    [DllImport("user32.dll")] static extern bool ReleaseCapture();
+    [DllImport("user32.dll")] static extern IntPtr SendMessage(IntPtr hWnd, int Msg, IntPtr wParam, IntPtr lParam);
+    const int WM_NCLBUTTONDOWN = 0xA1;
+
+    void HandleWin(string raw)
+    {
+        if (raw.Contains("\"minimize\"")) { WindowState = FormWindowState.Minimized; return; }
+        if (raw.Contains("\"maximize\"")) { ToggleMaximize(); return; }
+        if (raw.Contains("\"close\"")) { Close(); return; }
+        if (raw.Contains("\"ht\""))
+        {
+            int ht = ParseHt(raw);
+            if (ht != 0) { ReleaseCapture(); SendMessage(Handle, WM_NCLBUTTONDOWN, (IntPtr)ht, IntPtr.Zero); }
+        }
+    }
+
+    void ToggleMaximize()
+    {
+        if (WindowState == FormWindowState.Maximized) { WindowState = FormWindowState.Normal; }
+        else { MaximizedBounds = Screen.FromHandle(Handle).WorkingArea; WindowState = FormWindowState.Maximized; }
+    }
+
+    static int ParseHt(string raw)
+    {
+        int i = raw.IndexOf("\"ht\":", StringComparison.Ordinal);
+        if (i < 0) return 0;
+        i += 5;
+        int j = i;
+        while (j < raw.Length && char.IsDigit(raw[j])) j++;
+        int v;
+        return int.TryParse(raw.Substring(i, j - i), out v) ? v : 0;
     }
 
     protected override void OnFormClosed(FormClosedEventArgs e)
