@@ -1110,7 +1110,7 @@ class Component extends DCLogic {
         autoexecBtn: (s.cs2 && s.cs2.autoexec) ? 'Rewrite autoexec.cfg' : 'Write autoexec.cfg',
       },
       writeCs2: () => this.writeCs2(), copyCs2: () => this.copyText((this.state.cs2 && this.state.cs2.launchOptions) || ''),
-      advanced: () => this.toast('Advanced mode — manual tweak editor'),
+      advanced: () => this.go('tuning'),
       benchmark: () => this.benchmark(),
       startTuning: () => this.go('tuning'),
       goCheck: () => this.go('check'), goTune: () => this.go('tuning'),

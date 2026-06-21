@@ -1,18 +1,16 @@
 # Working Memory
 
 ## Active Task
-Move codebase files to the repository root, rename all references and executables to `Volante` (Completed).
+Volante redesign is complete and on `main`: WebView2 desktop app + real telemetry +
+functional profiles + history + CS2 setup + Pester tests.
 
-## Todo List
-- [x] Move all project files from `GameTune/` to the repository root.
-- [x] Rename `GameTune.cmd` to `Volante.cmd` and update references.
-- [x] Rename `installer/GameTune.iss` to `installer/Volante.iss` and update installer contents.
-- [x] Update `README.md` to replace "GameTune" with "Volante".
-- [x] Update `src/Launcher.cs` and build scripts to use `Volante` instead of `GameTune`.
-- [x] Update engine (`Optimizer.Engine.psm1`, `Tweaks.ps1`) to use `Volante` paths.
-- [x] Stage, commit, and push the restructured project.
+## Recently completed
+- Phases 0-3: WebView2 host (`src/Host`), JS↔PowerShell bridge, live telemetry,
+  readiness/profiles/history, optional FPS (PresentMon).
+- Frameless custom window (drag/resize/min/max/close, shadow, Win11 rounded corners),
+  Games icon fix, WPF GUI retired, installer ships the WebView2 DLLs.
+- Pester suite (13 tests), profiles drive tweak sets + dry-run Preview, CS2
+  detect/autoexec/launch-options, "Advanced mode" opens Tune.
 
-
-
-
-
+## Next
+See ROADMAP.md "Next".

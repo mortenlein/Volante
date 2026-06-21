@@ -183,7 +183,23 @@ class VolanteForm : Form
     // --- Frameless window chrome (the custom title bar lives in the web UI) -----
     [DllImport("user32.dll")] static extern bool ReleaseCapture();
     [DllImport("user32.dll")] static extern IntPtr SendMessage(IntPtr hWnd, int Msg, IntPtr wParam, IntPtr lParam);
+    [DllImport("dwmapi.dll")] static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int val, int size);
     const int WM_NCLBUTTONDOWN = 0xA1;
+    const int CS_DROPSHADOW = 0x00020000;
+    const int DWMWA_WINDOW_CORNER_PREFERENCE = 33, DWMWCP_ROUND = 2;
+
+    // Drop shadow on the borderless window (works Win10/11).
+    protected override CreateParams CreateParams
+    {
+        get { var cp = base.CreateParams; cp.ClassStyle |= CS_DROPSHADOW; return cp; }
+    }
+
+    // Rounded corners on Windows 11 (ignored on older Windows).
+    protected override void OnHandleCreated(EventArgs e)
+    {
+        base.OnHandleCreated(e);
+        try { int pref = DWMWCP_ROUND; DwmSetWindowAttribute(Handle, DWMWA_WINDOW_CORNER_PREFERENCE, ref pref, sizeof(int)); } catch { }
+    }
 
     void HandleWin(string raw)
     {
