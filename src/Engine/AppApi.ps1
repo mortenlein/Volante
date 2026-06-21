@@ -174,6 +174,8 @@ function Invoke-VolanteCommand {
             'resetProfile'     { Reset-ProfileTweaks -Id $a.id | Out-Null; Get-TweakCards -Profile $a.id }
             'getHistory'       { Get-AppHistory -Take 12 }
             'fpsAvailable'     { [pscustomobject]@{ available = (Get-FpsAvailable) } }
+            'getSettings'      { Get-AppSettings }
+            'setSettings'      { Set-AppSettings -StaleDriverDays $a.staleDriverDays -MonitorPollMs $a.monitorPollMs -PresentMonPath $a.presentMonPath }
             'getCs2'           { Get-Cs2Info }
             'writeCs2Autoexec' { $r = Set-Cs2Autoexec; if ($r.ok) { Add-AppHistory -Type 'apply' -Text 'Wrote CS2 autoexec.cfg' }; $r }
             'runBenchmark'     {

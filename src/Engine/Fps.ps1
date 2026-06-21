@@ -7,6 +7,7 @@
 #>
 
 function Get-PresentMonPath {
+    try { $p = (Get-AppSettings).presentMonPath; if ($p -and (Test-Path -LiteralPath $p)) { return $p } } catch {}
     $cmd = Get-Command 'PresentMon.exe' -ErrorAction SilentlyContinue
     if ($cmd) { return $cmd.Source }
     $dirs = @(

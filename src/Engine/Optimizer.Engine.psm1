@@ -238,6 +238,9 @@ function Import-OptimizerProfile {
 # the tweak script blocks resolve Set-TrackedValue etc. without exporting them).
 . (Join-Path $PSScriptRoot 'Tweaks.ps1')
 
+# Load user settings (read by the diagnostics/telemetry below).
+. (Join-Path $PSScriptRoot 'Settings.ps1')
+
 # Load the dashboard diagnostics (read-only system checks shown before tuning).
 . (Join-Path $PSScriptRoot 'Dashboard.ps1')
 
@@ -264,4 +267,5 @@ Export-ModuleMember -Function `
     Get-AppHistory, Add-AppHistory, `
     Get-PresentMonPath, Get-FpsAvailable, Invoke-FpsBenchmark, `
     Get-Cs2Info, Set-Cs2Autoexec, `
+    Get-AppSettings, Set-AppSettings, `
     Get-DashboardData, Get-TweakCards, Invoke-VolanteCommand

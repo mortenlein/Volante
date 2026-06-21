@@ -206,6 +206,7 @@ function Convert-NvidiaDriverVersion {
 
 function Get-GpuDriverStatus {
     $list = @()
+    $staleDays = 90; try { $staleDays = [int](Get-AppSettings).staleDriverDays } catch {}
     try {
         $vcs = @(Get-CimInstance Win32_VideoController -ErrorAction Stop |
                  Where-Object { $_.DriverVersion -and $_.PNPDeviceID -like 'PCI\*' })
@@ -230,7 +231,7 @@ function Get-GpuDriverStatus {
             MarketingVersion = $(if ($vendor -eq 'NVIDIA') { Convert-NvidiaDriverVersion $vc.DriverVersion } else { $null })
             DriverDate       = $date
             AgeDays          = $age
-            IsStale          = ($null -ne $age -and $age -gt 90)
+            IsStale          = ($null -ne $age -and $age -gt $staleDays)
             DownloadUrl      = $url
         }
     }
@@ -256,8 +257,19 @@ function Test-TcpLatency {
     finally { $client.Close() }
 }
 
-# Curated Steam/Valve endpoints. Edit this list to target endpoints near you.
+# Curated Steam/Valve endpoints; overridable via settings (pingTargets).
 function Get-ValvePingTargets {
+    $custom = @()
+    try { $custom = @((Get-AppSettings).pingTargets) } catch {}
+    if ($custom.Count -gt 0) {
+        return @($custom | ForEach-Object {
+            [pscustomobject]@{
+                Label    = $(if ($_.label) { $_.label } else { $_.host })
+                HostName = $_.host
+                Port     = $(if ($_.port) { [int]$_.port } else { 443 })
+            }
+        })
+    }
     @(
         [pscustomobject]@{ Label = 'Steam (valvesoftware.com)'; HostName = 'valvesoftware.com';      Port = 443 }
         [pscustomobject]@{ Label = 'Steam store';               HostName = 'store.steampowered.com'; Port = 443 }

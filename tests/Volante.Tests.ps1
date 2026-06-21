@@ -112,6 +112,16 @@ Describe 'Profiles persistence' {
     }
 }
 
+Describe 'Settings' {
+    It 'round-trips and affects the stale-driver threshold' {
+        $orig = (Get-AppSettings).staleDriverDays
+        Set-AppSettings -StaleDriverDays 120 | Out-Null
+        (Get-AppSettings).staleDriverDays | Should Be 120
+        Set-AppSettings -StaleDriverDays $orig | Out-Null
+        (Get-AppSettings).staleDriverDays | Should Be $orig
+    }
+}
+
 Describe 'Telemetry history persistence' {
     It 'records and reads back samples' {
         InModuleScope Optimizer.Engine {
