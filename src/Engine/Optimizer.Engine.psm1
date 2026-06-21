@@ -260,7 +260,8 @@ Export-ModuleMember -Function `
     Get-GpuDriverStatus, Get-ValvePing, Get-ValvePingTargets, `
     Get-GpuControlPanelRecommendations, Open-GpuControlPanel, `
     Get-MonitorTelemetry, `
-    Get-AppProfiles, Set-ActiveProfile, Get-AppHistory, Add-AppHistory, `
+    Get-AppProfiles, Set-ActiveProfile, Save-ProfileTweaks, Reset-ProfileTweaks, `
+    Get-AppHistory, Add-AppHistory, `
     Get-PresentMonPath, Get-FpsAvailable, Invoke-FpsBenchmark, `
     Get-Cs2Info, Set-Cs2Autoexec, `
     Get-DashboardData, Get-TweakCards, Invoke-VolanteCommand

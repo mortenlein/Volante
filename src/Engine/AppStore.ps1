@@ -44,9 +44,30 @@ function Get-DefaultProfiles {
     )
 }
 
-# Which catalog tweaks a profile selects. Competitive shooters share a latency-
-# focused set; 'global' uses the full recommended preset.
-function Get-ProfileTweakIds {
+# profiles.json holds the active profile plus any user-customized tweak sets:
+#   { "active": "cs2", "custom": { "cs2": ["mouse-accel-off", ...] } }
+function Get-ProfileStore {
+    Initialize-Store
+    $active = 'cs2'; $custom = @{}
+    if (Test-Path -LiteralPath $script:ProfilesFile) {
+        try {
+            $j = Get-Content -LiteralPath $script:ProfilesFile -Raw | ConvertFrom-Json
+            if ($j.active) { $active = $j.active }
+            if ($j.custom) { foreach ($p in $j.custom.PSObject.Properties) { $custom[$p.Name] = @($p.Value) } }
+        } catch {}
+    }
+    [pscustomobject]@{ active = $active; custom = $custom }
+}
+
+function Save-ProfileStore {
+    param($Store)
+    Initialize-Store
+    [pscustomobject]@{ active = $Store.active; custom = $Store.custom } |
+        ConvertTo-Json -Depth 6 | Set-Content -LiteralPath $script:ProfilesFile -Encoding UTF8
+}
+
+# Default tweak sets: competitive shooters share a latency set; 'global' = full recommended.
+function Get-DefaultProfileTweakIds {
     param([string]$Id)
     $competitive = @(
         'mouse-accel-off', 'gamedvr-off', 'game-mode-on', 'startup-delay-off', 'menu-show-delay',
@@ -63,19 +84,38 @@ function Get-ProfileTweakIds {
     }
 }
 
+# A user-saved set wins over the default.
+function Get-ProfileTweakIds {
+    param([string]$Id)
+    $store = Get-ProfileStore
+    if ($store.custom.ContainsKey($Id)) { return @($store.custom[$Id]) }
+    Get-DefaultProfileTweakIds -Id $Id
+}
+
+function Save-ProfileTweaks {
+    param([string]$Id, [string[]]$Ids)
+    $s = Get-ProfileStore
+    $s.custom[$Id] = @($Ids)
+    Save-ProfileStore $s
+    [pscustomobject]@{ ok = $true; id = $Id; count = @($Ids).Count }
+}
+
+function Reset-ProfileTweaks {
+    param([string]$Id)
+    $s = Get-ProfileStore
+    if ($s.custom.ContainsKey($Id)) { $s.custom.Remove($Id) }
+    Save-ProfileStore $s
+    [pscustomobject]@{ ok = $true; id = $Id; customized = $false }
+}
+
 function Get-AppProfiles {
-    Initialize-Store
-    $active = 'cs2'
-    if (Test-Path -LiteralPath $script:ProfilesFile) {
-        try { $j = Get-Content -LiteralPath $script:ProfilesFile -Raw | ConvertFrom-Json; if ($j.active) { $active = $j.active } } catch {}
-    }
-    [pscustomobject]@{ active = $active; list = Get-DefaultProfiles }
+    $store = Get-ProfileStore
+    [pscustomobject]@{ active = $store.active; list = Get-DefaultProfiles; customized = @($store.custom.Keys) }
 }
 
 function Set-ActiveProfile {
     param([string]$Id)
-    Initialize-Store
-    [pscustomobject]@{ active = $Id } | ConvertTo-Json | Set-Content -LiteralPath $script:ProfilesFile -Encoding UTF8
+    $s = Get-ProfileStore; $s.active = $Id; Save-ProfileStore $s
     [pscustomobject]@{ active = $Id }
 }
 

@@ -378,7 +378,11 @@
           </div>
         </div>
         <div style="flex:none; border-top:1px solid #303036; padding:14px 30px; display:flex; align-items:center; justify-content:space-between; background:rgba(22,22,26,.5);">
-          <span style="font-size:11.5px; color:#6d6a66;">Restore point created automatically before applying.</span>
+          <div style="display:flex; align-items:center; gap:14px;">
+            <span style="font-size:11.5px; color:#6d6a66;">Restore point created first.</span>
+            <button onClick="{{saveProfile}}" style="background:none; border:none; color:#928f8b; font-size:11.5px; cursor:pointer; font-family:inherit; text-decoration:underline;" style-hover="color:#c4c2bf">Save as profile default</button>
+            <button onClick="{{resetProfile}}" style="background:none; border:none; color:#928f8b; font-size:11.5px; cursor:pointer; font-family:inherit; text-decoration:underline;" style-hover="color:#c4c2bf">Reset</button>
+          </div>
           <div style="display:flex; gap:9px;">
             <button onClick="{{goCheck}}" style="height:36px; padding:0 16px; background:#242429; color:#c4c2bf; border:1px solid #3f3f46; border-radius:7px; font-size:12.5px; cursor:pointer; font-family:inherit;" style-hover="background:#2c2c32;border-color:#54545c">Back</button>
             <button onClick="{{preview}}" style="height:36px; padding:0 16px; background:#242429; color:#c4c2bf; border:1px solid #3f3f46; border-radius:7px; font-size:12.5px; cursor:pointer; font-family:inherit;" style-hover="background:#2c2c32;border-color:#54545c">Preview</button>
@@ -736,6 +740,21 @@ class Component extends DCLogic {
     v.call('previewTweaks', { ids: ids }).then(r => {
       this.toast('Preview: ' + (r.would || 0) + ' would apply' + (r.skipped ? ', ' + r.skipped + ' need admin' : '') + ' - nothing changed');
     }).catch(err => this.toast('Preview failed: ' + err.message));
+  }
+  saveProfile() {
+    const v = window.volante;
+    const ids = this.state.tweaks.filter(t => t.enabled).map(t => t.id);
+    if (!(v && v.available)) { this.toast('Saved ' + ids.length + ' (preview)'); return; }
+    v.call('saveProfile', { id: this.state.profile, ids: ids })
+      .then(() => this.toast('Saved ' + ids.length + ' tweaks to ' + this.state.profile))
+      .catch(() => this.toast('Save failed'));
+  }
+  resetProfile() {
+    const v = window.volante;
+    if (!(v && v.available)) { this.toast('Reset (preview)'); return; }
+    v.call('resetProfile', { id: this.state.profile })
+      .then(t => { if (this.arr(t).length) this.setState({ tweaks: this.arr(t) }); this.toast('Reset ' + this.state.profile + ' to defaults'); })
+      .catch(() => this.toast('Reset failed'));
   }
   benchmark() {
     const v = window.volante;
@@ -1116,6 +1135,7 @@ class Component extends DCLogic {
       goCheck: () => this.go('check'), goTune: () => this.go('tuning'),
       goMonitor: () => this.go('monitor'), goHistory: () => this.go('history'),
       apply: () => this.applyTweaks(), preview: () => this.preview(), revert: () => this.revert(),
+      saveProfile: () => this.saveProfile(), resetProfile: () => this.resetProfile(),
       profiles, selectedProfileName,
       tweaks, enabledCount, tweakTotal: s.tweaks.length, activeCats,
       applyView, applyTotal, applyDone, applyPctStr: applyPct + '%',

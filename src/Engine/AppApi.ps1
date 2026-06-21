@@ -143,6 +143,8 @@ function Invoke-VolanteCommand {
             'revertAll'        { Invoke-RevertAllTweaks }
             'getProfiles'      { Get-AppProfiles }
             'setProfile'       { Set-ActiveProfile -Id $a.id }
+            'saveProfile'      { Save-ProfileTweaks -Id $a.id -Ids @($a.ids) }
+            'resetProfile'     { Reset-ProfileTweaks -Id $a.id | Out-Null; Get-TweakCards -Profile $a.id }
             'getHistory'       { Get-AppHistory -Take 12 }
             'fpsAvailable'     { [pscustomobject]@{ available = (Get-FpsAvailable) } }
             'getCs2'           { Get-Cs2Info }

@@ -94,6 +94,15 @@ Describe 'Profiles persistence' {
         Set-ActiveProfile -Id $orig | Out-Null   # restore
         (Get-AppProfiles).active | Should Be $orig
     }
+    It 'saves and resets a custom tweak set' {
+        InModuleScope Optimizer.Engine {
+            $default = @(Get-ProfileTweakIds -Id 'cs2')
+            Save-ProfileTweaks -Id 'cs2' -Ids @('mouse-accel-off', 'game-mode-on') | Out-Null
+            (Get-ProfileTweakIds -Id 'cs2').Count | Should Be 2
+            Reset-ProfileTweaks -Id 'cs2' | Out-Null
+            (Get-ProfileTweakIds -Id 'cs2').Count | Should Be $default.Count
+        }
+    }
 }
 
 Describe 'History persistence' {
