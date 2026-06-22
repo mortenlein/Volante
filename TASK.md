@@ -1,16 +1,21 @@
 # Working Memory
 
 ## Active Task
-Volante redesign is complete and on `main`: WebView2 desktop app + real telemetry +
-functional profiles + history + CS2 setup + Pester tests.
+**v2.0.0 released.** Tag `v2.0.0` + GitHub Release published with the portable ZIP
+(`dist\Volante-2.0.0-portable.zip`). All work on `main`.
 
-## Recently completed
-- Phases 0-3: WebView2 host (`src/Host`), JS↔PowerShell bridge, live telemetry,
-  readiness/profiles/history, optional FPS (PresentMon).
-- Frameless custom window (drag/resize/min/max/close, shadow, Win11 rounded corners),
-  Games icon fix, WPF GUI retired, installer ships the WebView2 DLLs.
-- Pester suite (13 tests), profiles drive tweak sets + dry-run Preview, CS2
-  detect/autoexec/launch-options, "Advanced mode" opens Tune.
+## Remaining tasks
+- [ ] **Code-signing** — provide a cert (`.pfx`) or run `tools\New-DevCert.ps1`, then
+      `tools\Sign.ps1`; re-cut a signed `Volante.exe` (+ installer).
+- [ ] **Inno installer** — install Inno Setup 6, run `tools\Build-Installer.ps1`, and
+      attach `dist\Volante-Setup-2.0.0.exe` to the v2.0.0 GitHub Release.
+- [ ] **Live verification** of `Volante.exe`: frameless drag/resize, per-tweak revert,
+      benchmark FPS (elevated, with a game running), config export/import.
+- [ ] **(Optional)** continuous live FPS (streaming PresentMon); cross-session telemetry
+      graphs; more game profiles.
+- [ ] **(Decision)** per-game NVIDIA/AMD control-panel automation — risky; needs a call.
 
-## Next
-See ROADMAP.md "Next".
+## Recently completed (v2.0.0)
+Full session: WebView2 app + bridge, live telemetry + persisted history, editable
+profiles, CS2 setup, restore points, Settings, config export/import, bundled PresentMon,
+19 Pester tests, portable ZIP + GitHub Release. See CHANGELOG.md.

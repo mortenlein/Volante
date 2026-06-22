@@ -16,15 +16,16 @@ A single PowerShell engine (`src/Engine`) defines a catalog of tweaks, each with
 
 | Mode | Use |
 |------|-----|
-| **GUI** (WPF) | Interactive - pick tweaks, dry-run, apply, revert |
+| **App** (WebView2 GUI) | Interactive - dashboard, system check, tune, live monitor, profiles, settings |
 | **Headless** | Scripted/silent for deployed PCs (Intune, SCCM, MDT, login scripts) |
 
 Both call the *same* engine, so results are identical. Every change records its
 **original value** to a backup store before writing, so revert restores reality -
 not a guessed default.
 
-- Backup store: `%ProgramData%\Volante\backup.json`
-- Logs: `%ProgramData%\Volante\logs\gametune_YYYYMMDD.log`
+- Backup store (true revert): `%ProgramData%\Volante\backup.json`
+- App data (same folder): `profiles.json`, `history.json`, `settings.json`, `telemetry.json`
+- Logs: `%ProgramData%\Volante\logs\volante_YYYYMMDD.log`
 
 ## Requirements
 
@@ -47,12 +48,19 @@ Screens:
 - **System check** - read-only diagnostics: monitor **refresh rate** (current vs max, with a
   one-click **Set to max**), **GPU driver** version/age + vendor link, **ping to Valve/Steam**
   (TCP-handshake latency proxy), and **CS2 GPU control-panel** recommendations.
-- **Tune** - the tweak catalog as toggles by category; **Apply** (restore point first) and
-  **Revert all**, both via the engine.
+- **Tune** - the tweak catalog as toggles by category; **Preview** (dry-run), **Apply**
+  (restore point first), **Revert all**, and per-tweak **Revert** - all via the engine.
 - **Monitor** - live hardware telemetry: CPU + per-core, GPU load/temp/clock, VRAM, power,
-  RAM, ping (nvidia-smi + Get-Counter). **FPS** via bundled PresentMon (below).
-- **Games** - per-game profiles (the active profile is persisted).
-- **History** - applied/reverted/benchmark/check events, persisted under `%ProgramData%\Volante`.
+  RAM, ping (nvidia-smi + Get-Counter) with persisted history and a GPU/CPU trend chart.
+  **FPS** + benchmark via bundled PresentMon (below).
+- **Games** - per-game profiles with editable/custom tweak sets (persisted).
+- **History** - applied/reverted/benchmark/check events + real Windows **restore points**
+  (list + create), persisted under `%ProgramData%\Volante`.
+- **Settings** - driver-age threshold, monitor poll interval, PresentMon path, ping
+  endpoints, and **config export/import** to share your profiles + settings.
+
+Prebuilt portable ZIPs are on the **[Releases](https://github.com/mortenlein/Volante/releases)**
+page - extract anywhere and run `Volante.exe`.
 
 ### FPS (PresentMon)
 
@@ -119,7 +127,7 @@ risk/scope, or `-Report` to see what's currently applied.
 | Network     | 1 | **per-NIC Nagle off** (advanced) |
 
 Each tweak is tagged Safe / Caution / Advanced. The **Recommended** preset (used by
-the wizard and `-Recommended`) is the ~19 lower-risk ones; Advanced/contested tweaks
+the Tune screen's profiles and `-Recommended`) is the ~19 lower-risk ones; Advanced/contested tweaks
 (`hags-on`, `diagtrack-off`, `win32-priority-separation`, `fast-startup-off`,
 `reduce-animations`, `transparency-off`, `gpu-msi-mode`, `nagle-off`) are opt-in.
 
